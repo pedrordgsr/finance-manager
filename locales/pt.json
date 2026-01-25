@@ -17,17 +17,56 @@
   },
   "categories": {
     "title": "Categorias",
+    "newCategory": "Nova Categoria",
     "searchPlaceholder": "Buscar categorias...",
+    "filter": {
+      "allTypes": "Todos os tipos"
+    },
     "table": {
       "id": "ID",
       "name": "Nome",
       "type": "Tipo",
-      "createdAt": "Criado em"
+      "createdAt": "Criado em",
+      "actions": "Ações"
     },
     "kinds": {
       "IN": "Entrada",
       "OUT": "Saída",
       "BOTH": "Ambos"
+    },
+    "form": {
+      "title": "Nova Categoria",
+      "description": "Preencha os dados abaixo para criar uma nova categoria.",
+      "name": "Nome",
+      "namePlaceholder": "Digite o nome da categoria",
+      "nameDescription": "Nome único para identificar a categoria.",
+      "kind": "Tipo",
+      "kindDescription": "Selecione se a categoria é para entradas, saídas ou ambos.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "clear": "Limpar"
+    },
+    "actions": {
+      "edit": "Editar",
+      "delete": "Deletar"
+    },
+    "delete": {
+      "title": "Confirmar exclusão",
+      "description": "Tem certeza que deseja deletar a categoria \"{name}\"? Esta ação não pode ser desfeita.",
+      "confirm": "Deletar",
+      "deleting": "Deletando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao deletar categoria",
+      "errorForeignKey": "Não é possível deletar esta categoria pois existem transações associadas a ela"
+    },
+    "edit": {
+      "title": "Editar Categoria",
+      "description": "Atualize os dados da categoria abaixo.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao atualizar categoria",
+      "errorDuplicate": "Já existe uma categoria com este nome"
     },
     "noResults": "Nenhuma categoria encontrada.",
     "pagination": {

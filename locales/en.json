@@ -17,17 +17,56 @@
   },
   "categories": {
     "title": "Categories",
+    "newCategory": "New Category",
     "searchPlaceholder": "Search categories...",
+    "filter": {
+      "allTypes": "All types"
+    },
     "table": {
       "id": "ID",
       "name": "Name",
       "type": "Type",
-      "createdAt": "Created At"
+      "createdAt": "Created At",
+      "actions": "Actions"
     },
     "kinds": {
       "IN": "Income",
       "OUT": "Expense",
       "BOTH": "Both"
+    },
+    "form": {
+      "title": "New Category",
+      "description": "Fill in the details below to create a new category.",
+      "name": "Name",
+      "namePlaceholder": "Enter category name",
+      "nameDescription": "Unique name to identify the category.",
+      "kind": "Type",
+      "kindDescription": "Select if the category is for income, expenses, or both.",
+      "save": "Save",
+      "saving": "Saving...",
+      "clear": "Clear"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete the category \"{name}\"? This action cannot be undone.",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "cancel": "Cancel",
+      "error": "Error deleting category",
+      "errorForeignKey": "Cannot delete this category because there are transactions associated with it"
+    },
+    "edit": {
+      "title": "Edit Category",
+      "description": "Update the category details below.",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "error": "Error updating category",
+      "errorDuplicate": "A category with this name already exists"
     },
     "noResults": "No categories found.",
     "pagination": {
