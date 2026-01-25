@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { CategoriesTable } from "@/components/categories-table";
+import {getTranslations} from 'next-intl/server';
 
 interface CategoriesPageProps {
   searchParams: Promise<{
@@ -9,6 +10,7 @@ interface CategoriesPageProps {
 }
 
 export default async function CategoriesPage({ searchParams }: CategoriesPageProps) {
+  const t = await getTranslations('categories');
   const params = await searchParams;
   const currentPage = parseInt(params.page || "1");
   const searchQuery = params.search || "";
@@ -39,7 +41,7 @@ export default async function CategoriesPage({ searchParams }: CategoriesPagePro
   return (
     <div className="flex flex-col gap-4 p-4 pt-0">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Categorias</h1>
+        <h1 className="text-2xl font-bold">{t('title')}</h1>
       </div>
       <CategoriesTable
         categories={categories}

@@ -2,6 +2,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import {NextIntlClientProvider} from 'next-intl';
+import {getLocale, getMessages} from 'next-intl/server';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,16 +23,20 @@ export const metadata: Metadata = {
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-   <html lang="en" suppressHydrationWarning>
+   <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <NextIntlClientProvider messages={messages}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -45,6 +51,7 @@ export default function RootLayout({
           </main>
         </SidebarProvider>
         </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

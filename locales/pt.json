@@ -1,0 +1,40 @@
+{
+  "common": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "toggleTheme": "Alternar tema",
+    "language": "Idioma"
+  },
+  "sidebar": {
+    "appName": "Finance Manager",
+    "movements": "Movimentações",
+    "transactions": "Transações",
+    "registers": "Cadastros",
+    "categories": "Categorias",
+    "accounts": "Contas",
+    "paymentMethods": "Formas de Pagamento"
+  },
+  "categories": {
+    "title": "Categorias",
+    "searchPlaceholder": "Buscar categorias...",
+    "table": {
+      "id": "ID",
+      "name": "Nome",
+      "type": "Tipo",
+      "createdAt": "Criado em"
+    },
+    "kinds": {
+      "IN": "Entrada",
+      "OUT": "Saída",
+      "BOTH": "Ambos"
+    },
+    "noResults": "Nenhuma categoria encontrada.",
+    "pagination": {
+      "page": "Página",
+      "of": "de",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
+  }
+}
