@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Direction {
+  IN
+  OUT
+}
+
+enum CategoryKind {
+  IN
+  OUT
+  BOTH
+}
+
+enum AccountType {
+  CASH
+  BANK
+  CREDIT_CARD
+  INVESTMENT
+}
+
+model Category {
+  id        Int          @id @default(autoincrement())
+  name      String       @unique
+  kind      CategoryKind @default(BOTH)
+  createdAt DateTime     @default(now())
+
+  transactions Transaction[]
+}
+
+model PaymentMethod {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+}
+
+model Account {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  type      AccountType @default(BANK)
+  createdAt DateTime    @default(now())
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id             Int       @id @default(autoincrement())
+
+  direction      Direction
+  amountCents    Int       // evita float: R$ 12,34 => 1234
+
+  issueDate      DateTime
+  settlementDate DateTime?
+
+  description    String
+  notes          String?
+
+  categoryId     Int
+  category       Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  paymentMethodId Int?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id], onDelete: SetNull)
+
+  accountId      Int?
+  account        Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([issueDate])
+  @@index([settlementDate])
+  @@index([categoryId])
+  @@index([direction])
+}
