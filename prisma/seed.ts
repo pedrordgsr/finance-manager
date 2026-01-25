@@ -7,72 +7,72 @@ const adapter = new PrismaBetterSqlite3({ url: connectionString });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("Iniciando seed do banco de dados...");
+  console.log("Starting database seed...");
 
-  // Limpar dados existentes
+  // Clear existing data
   await prisma.transaction.deleteMany();
   await prisma.category.deleteMany();
   await prisma.paymentMethod.deleteMany();
   await prisma.account.deleteMany();
 
-  // Criar Categorias
-  console.log("Criando categorias...");
+  // Create Categories
+  console.log("Creating categories...");
   const categories = await Promise.all([
-    // Categorias de Entrada
-    prisma.category.create({ data: { name: "Salário", kind: "IN" } }),
+    // Income Categories
+    prisma.category.create({ data: { name: "Salary", kind: "IN" } }),
     prisma.category.create({ data: { name: "Freelance", kind: "IN" } }),
-    prisma.category.create({ data: { name: "Investimentos", kind: "IN" } }),
-    prisma.category.create({ data: { name: "Outros Recebimentos", kind: "IN" } }),
+    prisma.category.create({ data: { name: "Investments", kind: "IN" } }),
+    prisma.category.create({ data: { name: "Other Income", kind: "IN" } }),
 
-    // Categorias de Saída
-    prisma.category.create({ data: { name: "Alimentação", kind: "OUT" } }),
-    prisma.category.create({ data: { name: "Transporte", kind: "OUT" } }),
-    prisma.category.create({ data: { name: "Moradia", kind: "OUT" } }),
-    prisma.category.create({ data: { name: "Saúde", kind: "OUT" } }),
-    prisma.category.create({ data: { name: "Educação", kind: "OUT" } }),
-    prisma.category.create({ data: { name: "Lazer", kind: "OUT" } }),
-    prisma.category.create({ data: { name: "Compras", kind: "OUT" } }),
-    prisma.category.create({ data: { name: "Contas e Serviços", kind: "OUT" } }),
+    // Expense Categories
+    prisma.category.create({ data: { name: "Food", kind: "OUT" } }),
+    prisma.category.create({ data: { name: "Transportation", kind: "OUT" } }),
+    prisma.category.create({ data: { name: "Housing", kind: "OUT" } }),
+    prisma.category.create({ data: { name: "Health", kind: "OUT" } }),
+    prisma.category.create({ data: { name: "Education", kind: "OUT" } }),
+    prisma.category.create({ data: { name: "Entertainment", kind: "OUT" } }),
+    prisma.category.create({ data: { name: "Shopping", kind: "OUT" } }),
+    prisma.category.create({ data: { name: "Bills and Services", kind: "OUT" } }),
 
-    // Categorias que podem ser ambas
-    prisma.category.create({ data: { name: "Transferências", kind: "BOTH" } }),
+    // Categories that can be both
+    prisma.category.create({ data: { name: "Transfers", kind: "BOTH" } }),
   ]);
 
-  // Criar Métodos de Pagamento
-  console.log("Criando métodos de pagamento...");
+  // Create Payment Methods
+  console.log("Creating payment methods...");
   const paymentMethods = await Promise.all([
-    prisma.paymentMethod.create({ data: { name: "Dinheiro" } }),
-    prisma.paymentMethod.create({ data: { name: "Cartão de Crédito" } }),
-    prisma.paymentMethod.create({ data: { name: "Cartão de Débito" } }),
+    prisma.paymentMethod.create({ data: { name: "Cash" } }),
+    prisma.paymentMethod.create({ data: { name: "Credit Card" } }),
+    prisma.paymentMethod.create({ data: { name: "Debit Card" } }),
     prisma.paymentMethod.create({ data: { name: "PIX" } }),
-    prisma.paymentMethod.create({ data: { name: "Transferência Bancária" } }),
+    prisma.paymentMethod.create({ data: { name: "Bank Transfer" } }),
     prisma.paymentMethod.create({ data: { name: "Boleto" } }),
   ]);
 
-  // Criar Contas
-  console.log("Criando contas...");
+  // Create Accounts
+  console.log("Creating accounts...");
   const accounts = await Promise.all([
-    prisma.account.create({ data: { name: "Conta Corrente", type: "BANK" } }),
-    prisma.account.create({ data: { name: "Poupança", type: "BANK" } }),
-    prisma.account.create({ data: { name: "Carteira", type: "CASH" } }),
+    prisma.account.create({ data: { name: "Checking Account", type: "BANK" } }),
+    prisma.account.create({ data: { name: "Savings", type: "BANK" } }),
+    prisma.account.create({ data: { name: "Wallet", type: "CASH" } }),
     prisma.account.create({ data: { name: "Nubank", type: "CREDIT_CARD" } }),
-    prisma.account.create({ data: { name: "Investimentos", type: "INVESTMENT" } }),
+    prisma.account.create({ data: { name: "Investments", type: "INVESTMENT" } }),
   ]);
 
-  // Criar Transações de Exemplo
-  console.log("Criando transações de exemplo...");
-  
-  // Salário do mês
+  // Create Example Transactions
+  console.log("Creating example transactions...");
+
+  // Monthly Salary
   await prisma.transaction.create({
     data: {
       direction: "IN",
-      amountCents: 500000, // R$ 5.000,00
+      amountCents: 500000, // $5,000.00
       issueDate: new Date("2026-01-05"),
       settlementDate: new Date("2026-01-05"),
-      description: "Salário Janeiro/2026",
-      categoryId: categories[0].id, // Salário
-      paymentMethodId: paymentMethods[4].id, // Transferência Bancária
-      accountId: accounts[0].id, // Conta Corrente
+      description: "January 2026 Salary",
+      categoryId: categories[0].id, // Salary
+      paymentMethodId: paymentMethods[4].id, // Bank Transfer
+      accountId: accounts[0].id, // Checking Account
     },
   });
 
@@ -80,25 +80,25 @@ async function main() {
   await prisma.transaction.create({
     data: {
       direction: "IN",
-      amountCents: 150000, // R$ 1.500,00
+      amountCents: 150000, // $1,500.00
       issueDate: new Date("2026-01-15"),
       settlementDate: new Date("2026-01-15"),
-      description: "Projeto Website Cliente XYZ",
+      description: "Website Project for Client XYZ",
       categoryId: categories[1].id, // Freelance
       paymentMethodId: paymentMethods[3].id, // PIX
       accountId: accounts[0].id,
     },
   });
 
-  // Despesas
+  // Expenses
   await prisma.transaction.create({
     data: {
       direction: "OUT",
-      amountCents: 120000, // R$ 1.200,00
+      amountCents: 120000, // $1,200.00
       issueDate: new Date("2026-01-10"),
       settlementDate: new Date("2026-01-10"),
-      description: "Aluguel Janeiro",
-      categoryId: categories[6].id, // Moradia
+      description: "January Rent",
+      categoryId: categories[6].id, // Housing
       paymentMethodId: paymentMethods[5].id, // Boleto
       accountId: accounts[0].id,
     },
@@ -107,12 +107,12 @@ async function main() {
   await prisma.transaction.create({
     data: {
       direction: "OUT",
-      amountCents: 8500, // R$ 85,00
+      amountCents: 8500, // $85.00
       issueDate: new Date("2026-01-12"),
       settlementDate: new Date("2026-01-15"),
-      description: "Supermercado",
-      categoryId: categories[4].id, // Alimentação
-      paymentMethodId: paymentMethods[1].id, // Cartão de Crédito
+      description: "Groceries",
+      categoryId: categories[4].id, // Food
+      paymentMethodId: paymentMethods[1].id, // Credit Card
       accountId: accounts[3].id, // Nubank
     },
   });
@@ -120,12 +120,12 @@ async function main() {
   await prisma.transaction.create({
     data: {
       direction: "OUT",
-      amountCents: 4500, // R$ 45,00
+      amountCents: 4500, // $45.00
       issueDate: new Date("2026-01-13"),
       settlementDate: new Date("2026-01-13"),
-      description: "Uber para o trabalho",
-      categoryId: categories[5].id, // Transporte
-      paymentMethodId: paymentMethods[2].id, // Cartão de Débito
+      description: "Uber to work",
+      categoryId: categories[5].id, // Transportation
+      paymentMethodId: paymentMethods[2].id, // Debit Card
       accountId: accounts[0].id,
     },
   });
@@ -133,10 +133,10 @@ async function main() {
   await prisma.transaction.create({
     data: {
       direction: "OUT",
-      amountCents: 15000, // R$ 150,00
+      amountCents: 15000, // $150.00
       issueDate: new Date("2026-01-14"),
-      description: "Conta de Luz",
-      categoryId: categories[11].id, // Contas e Serviços
+      description: "Electricity Bill",
+      categoryId: categories[11].id, // Bills and Services
       paymentMethodId: paymentMethods[5].id, // Boleto
       accountId: accounts[0].id,
     },
@@ -145,11 +145,11 @@ async function main() {
   await prisma.transaction.create({
     data: {
       direction: "OUT",
-      amountCents: 12000, // R$ 120,00
+      amountCents: 12000, // $120.00
       issueDate: new Date("2026-01-16"),
       description: "Netflix + Spotify",
-      categoryId: categories[9].id, // Lazer
-      paymentMethodId: paymentMethods[1].id, // Cartão de Crédito
+      categoryId: categories[9].id, // Entertainment
+      paymentMethodId: paymentMethods[1].id, // Credit Card
       accountId: accounts[3].id,
     },
   });
@@ -157,50 +157,50 @@ async function main() {
   await prisma.transaction.create({
     data: {
       direction: "OUT",
-      amountCents: 25000, // R$ 250,00
+      amountCents: 25000, // $250.00
       issueDate: new Date("2026-01-18"),
       settlementDate: new Date("2026-01-18"),
-      description: "Compras roupa",
-      notes: "Promoção de verão",
-      categoryId: categories[10].id, // Compras
-      paymentMethodId: paymentMethods[1].id, // Cartão de Crédito
+      description: "Clothing Shopping",
+      notes: "Summer Sale",
+      categoryId: categories[10].id, // Shopping
+      paymentMethodId: paymentMethods[1].id, // Credit Card
       accountId: accounts[3].id,
     },
   });
 
-  // Transferência para poupança
+  // Transfer to Savings
   await prisma.transaction.create({
     data: {
       direction: "OUT",
-      amountCents: 100000, // R$ 1.000,00
+      amountCents: 100000, // $1,000.00
       issueDate: new Date("2026-01-20"),
       settlementDate: new Date("2026-01-20"),
-      description: "Transferência para Poupança",
-      categoryId: categories[12].id, // Transferências
-      paymentMethodId: paymentMethods[4].id, // Transferência Bancária
-      accountId: accounts[0].id, // Saindo da Conta Corrente
+      description: "Transfer to Savings",
+      categoryId: categories[12].id, // Transfers
+      paymentMethodId: paymentMethods[4].id, // Bank Transfer
+      accountId: accounts[0].id, // From Checking Account
     },
   });
 
   await prisma.transaction.create({
     data: {
       direction: "IN",
-      amountCents: 100000, // R$ 1.000,00
+      amountCents: 100000, // $1,000.00
       issueDate: new Date("2026-01-20"),
       settlementDate: new Date("2026-01-20"),
-      description: "Transferência da Conta Corrente",
-      categoryId: categories[12].id, // Transferências
-      paymentMethodId: paymentMethods[4].id, // Transferência Bancária
-      accountId: accounts[1].id, // Entrando na Poupança
+      description: "Transfer from Checking Account",
+      categoryId: categories[12].id, // Transfers
+      paymentMethodId: paymentMethods[4].id, // Bank Transfer
+      accountId: accounts[1].id, // To Savings
     },
   });
 
-  console.log("Seed concluído com sucesso!");
+  console.log("Seed completed successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error("Erro ao executar seed:", e);
+    console.error("Error running seed:", e);
     process.exit(1);
   })
   .finally(async () => {
