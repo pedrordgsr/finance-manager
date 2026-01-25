@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
     if (!name || !kind) {
       return NextResponse.json(
-        { error: "Nome e tipo são obrigatórios" },
+        { error: "Name and kind are required" },
         { status: 400 }
       )
     }
@@ -22,17 +22,17 @@ export async function POST(request: Request) {
 
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
-    console.error("Erro ao criar categoria:", error)
+    console.error("Error creating category:", error)
     
     if (error instanceof Error && error.message.includes("Unique constraint")) {
       return NextResponse.json(
-        { error: "Já existe uma categoria com este nome" },
+        { error: "A category with this name already exists" },
         { status: 409 }
       )
     }
 
     return NextResponse.json(
-      { error: "Erro ao criar categoria" },
+      { error: "Error creating category" },
       { status: 500 }
     )
   }

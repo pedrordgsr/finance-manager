@@ -12,7 +12,7 @@ export async function PATCH(
 
     if (!name || !kind) {
       return NextResponse.json(
-        { error: "Nome e tipo são obrigatórios" },
+        { error: "Name and kind are required" },
         { status: 400 }
       )
     }
@@ -24,17 +24,17 @@ export async function PATCH(
 
     return NextResponse.json(category)
   } catch (error: any) {
-    // P2002 é o código do Prisma para violação de unique constraint
+    // P2002 is the Prisma code for unique constraint violation
     if (error.code === 'P2002') {
       return NextResponse.json(
-        { error: "errorDuplicate" },
+        { error: "A category with this name already exists" },
         { status: 409 }
       )
     }
 
-    console.error("Erro inesperado ao atualizar categoria:", error);
+    console.error("Unexpected error updating category:", error);
     return NextResponse.json(
-      { error: "error" },
+      { error: "Error updating category" },
       { status: 500 }
     )
   }
@@ -53,17 +53,17 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    // P2003 é o código do Prisma para violação de foreign key constraint
+    // P2003 is the Prisma code for foreign key constraint violation
     if (error.code === 'P2003') {
       return NextResponse.json(
-        { error: "errorForeignKey" },
+        { error: "Cannot delete category because it is being used by transactions" },
         { status: 409 }
       )
     }
 
-    console.error("Erro inesperado ao deletar categoria:", error);
+    console.error("Unexpected error deleting category:", error);
     return NextResponse.json(
-      { error: "error" },
+      { error: "Error deleting category" },
       { status: 500 }
     )
   }

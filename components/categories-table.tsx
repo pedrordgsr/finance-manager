@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { CategoryForm } from "@/components/category-form";
-import type { Category } from "@/generated/prisma/models/Category";
+import type { Category } from "@prisma/client";
 import { useTranslations, useLocale } from "next-intl";
 
 interface CategoriesTableProps {
@@ -338,7 +338,7 @@ export function CategoriesTable({
           <DialogHeader>
             <DialogTitle>{t('delete.title')}</DialogTitle>
             <DialogDescription>
-              {t('delete.description', { name: selectedCategory?.name })}
+              {t('delete.description', { name: selectedCategory?.name || '' })}
             </DialogDescription>
           </DialogHeader>
           {deleteError && (

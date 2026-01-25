@@ -57,7 +57,8 @@
       "deleting": "Deletando...",
       "cancel": "Cancelar",
       "error": "Erro ao deletar categoria",
-      "errorForeignKey": "Não é possível deletar esta categoria pois existem transações associadas a ela"
+      "errorForeignKey": "Não é possível deletar esta categoria pois existem transações associadas a ela",
+      "Cannot delete category because it is being used by transactions": "Não é possível deletar a categoria porque ela está sendo usada por transações"
     },
     "edit": {
       "title": "Editar Categoria",
