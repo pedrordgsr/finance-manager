@@ -6,6 +6,17 @@
     "toggleTheme": "Toggle theme",
     "language": "Language"
   },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "totalIncome": "Total Income",
+    "totalExpense": "Total Expense",
+    "balance": "Balance",
+    "recentTransactions": "Recent Transactions",
+    "viewAll": "View All Transactions",
+    "empty": "No recent transactions.",
+    "of": "of"
+  },
   "sidebar": {
     "appName": "Finance Manager",
     "movements": "Movements",

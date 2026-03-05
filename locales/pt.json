@@ -6,6 +6,17 @@
     "toggleTheme": "Alternar tema",
     "language": "Idioma"
   },
+  "dashboard": {
+    "title": "Painel de Controle",
+    "overview": "Visão Geral",
+    "totalIncome": "Total de Receitas",
+    "totalExpense": "Total de Despesas",
+    "balance": "Saldo Atual",
+    "recentTransactions": "Transações Recentes",
+    "viewAll": "Ver Todas Transações",
+    "empty": "Nenhuma transação recente.",
+    "of": "de"
+  },
   "sidebar": {
     "appName": "Finance Manager",
     "movements": "Movimentações",
