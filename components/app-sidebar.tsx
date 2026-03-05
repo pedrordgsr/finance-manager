@@ -20,7 +20,7 @@ import { useTranslations } from 'next-intl'
 
 export function AppSidebar() {
   const t = useTranslations('sidebar')
-  
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -44,7 +44,7 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        
+
         <SidebarGroup>
           <SidebarGroupLabel>{t('registers')}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -58,7 +58,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild disabled>
+                <SidebarMenuButton asChild>
                   <Link href="/accounts">
                     <Wallet />
                     <span>{t('accounts')}</span>
@@ -66,7 +66,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild disabled>
+                <SidebarMenuButton asChild>
                   <Link href="/payment-methods">
                     <CreditCard />
                     <span>{t('paymentMethods')}</span>

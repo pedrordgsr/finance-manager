@@ -76,5 +76,205 @@
       "previous": "Anterior",
       "next": "Próxima"
     }
+  },
+  "accounts": {
+    "title": "Contas",
+    "newAccount": "Nova Conta",
+    "searchPlaceholder": "Buscar contas...",
+    "filter": {
+      "allTypes": "Todos os tipos"
+    },
+    "table": {
+      "id": "ID",
+      "name": "Nome",
+      "type": "Tipo",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "types": {
+      "CASH": "Dinheiro",
+      "BANK": "Banco",
+      "CREDIT_CARD": "Cartão de Crédito",
+      "INVESTMENT": "Investimento"
+    },
+    "form": {
+      "title": "Nova Conta",
+      "description": "Preencha os dados abaixo para criar a conta.",
+      "name": "Nome",
+      "namePlaceholder": "Digite o nome da conta",
+      "nameDescription": "Nome único para identificar a conta.",
+      "type": "Tipo",
+      "typeDescription": "Selecione o tipo de conta.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "clear": "Limpar"
+    },
+    "actions": {
+      "edit": "Editar",
+      "delete": "Deletar"
+    },
+    "delete": {
+      "title": "Confirmar exclusão",
+      "description": "Tem certeza que deseja deletar a conta \"{name}\"? Esta ação não pode ser desfeita.",
+      "confirm": "Deletar",
+      "deleting": "Deletando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao deletar conta",
+      "errorForeignKey": "Não é possível deletar esta conta pois existem transações associadas a ela",
+      "Cannot delete account because it is being used by transactions": "Não é possível deletar a conta porque ela está sendo usada por transações"
+    },
+    "edit": {
+      "title": "Editar Conta",
+      "description": "Atualize os dados da conta abaixo.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao atualizar conta",
+      "errorDuplicate": "Já existe uma conta com este nome"
+    },
+    "noResults": "Nenhuma conta encontrada.",
+    "pagination": {
+      "page": "Página",
+      "of": "de",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
+  },
+  "paymentMethods": {
+    "title": "Formas de Pagamento",
+    "newMethod": "Nova Forma de Pagamento",
+    "searchPlaceholder": "Buscar formas de pagamento...",
+    "table": {
+      "id": "ID",
+      "name": "Nome",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "form": {
+      "title": "Nova Forma de Pagamento",
+      "description": "Preencha os dados abaixo para criar a forma de pagamento.",
+      "name": "Nome",
+      "namePlaceholder": "Digite o nome",
+      "nameDescription": "Nome único para identificar a forma de pagamento.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "clear": "Limpar"
+    },
+    "actions": {
+      "edit": "Editar",
+      "delete": "Deletar"
+    },
+    "delete": {
+      "title": "Confirmar exclusão",
+      "description": "Tem certeza que deseja deletar a forma de pagamento \"{name}\"? Esta ação não pode ser desfeita.",
+      "confirm": "Deletar",
+      "deleting": "Deletando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao deletar forma de pagamento",
+      "errorForeignKey": "Não é possível deletar esta forma de pagamento pois existem transações associadas a ela",
+      "Cannot delete payment method because it is being used by transactions": "Não é possível deletar a forma de pagamento porque ela está sendo usada por transações"
+    },
+    "edit": {
+      "title": "Editar Forma de Pagamento",
+      "description": "Atualize os dados da forma de pagamento abaixo.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao atualizar forma de pagamento",
+      "errorDuplicate": "Já existe uma forma de pagamento com este nome"
+    },
+    "noResults": "Nenhuma forma de pagamento encontrada.",
+    "pagination": {
+      "page": "Página",
+      "of": "de",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
+  },
+  "transactions": {
+    "title": "Transações",
+    "newTransaction": "Nova Transação",
+    "searchPlaceholder": "Buscar transações...",
+    "filter": {
+      "allDirections": "Todas as direções",
+      "allCategories": "Todas as categorias",
+      "allAccounts": "Todas as contas",
+      "allPaymentMethods": "Todas as formas de pagamento"
+    },
+    "table": {
+      "id": "ID",
+      "description": "Descrição",
+      "amount": "Valor",
+      "direction": "Direção",
+      "category": "Categoria",
+      "account": "Conta",
+      "paymentMethod": "Forma de Pag.",
+      "issueDate": "Data de Emissão",
+      "settlementDate": "Data de Liquidação",
+      "createdAt": "Criado em",
+      "actions": "Ações"
+    },
+    "directions": {
+      "IN": "Entrada",
+      "OUT": "Saída"
+    },
+    "form": {
+      "title": "Nova Transação",
+      "description": "Preencha os dados abaixo para criar a transação.",
+      "transactionDescription": "Descrição",
+      "transactionDescriptionPlaceholder": "Digite a descrição",
+      "transactionDescriptionHint": "Breve descrição da transação.",
+      "amount": "Valor",
+      "amountPlaceholder": "0,00",
+      "amountHint": "Valor da transação.",
+      "direction": "Direção",
+      "directionHint": "Selecione se é uma entrada ou saída.",
+      "issueDate": "Data de Emissão",
+      "issueDateHint": "Data em que a transação ocorreu.",
+      "settlementDate": "Data de Liquidação (Opcional)",
+      "settlementDateHint": "Data em que foi efetivamente pago/recebido.",
+      "category": "Categoria",
+      "categoryHint": "Selecione a categoria.",
+      "categoryPlaceholder": "Selecione uma categoria",
+      "account": "Conta (Opcional)",
+      "accountHint": "Selecione a conta.",
+      "accountPlaceholder": "Selecione uma conta",
+      "paymentMethod": "Forma de Pagamento (Opcional)",
+      "paymentMethodHint": "Selecione a forma de pagamento.",
+      "paymentMethodPlaceholder": "Selecione uma forma de pagamento",
+      "notes": "Observações (Opcional)",
+      "notesPlaceholder": "Detalhes adicionais...",
+      "notesHint": "Detalhes opcionais sobre a transação.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "clear": "Limpar"
+    },
+    "actions": {
+      "edit": "Editar",
+      "delete": "Deletar"
+    },
+    "delete": {
+      "title": "Confirmar exclusão",
+      "description": "Tem certeza que deseja deletar a transação \"{description}\"? Esta ação não pode ser desfeita.",
+      "confirm": "Deletar",
+      "deleting": "Deletando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao deletar transação"
+    },
+    "edit": {
+      "title": "Editar Transação",
+      "description": "Atualize os dados da transação abaixo.",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao atualizar transação"
+    },
+    "noResults": "Nenhuma transação encontrada.",
+    "pagination": {
+      "page": "Página",
+      "of": "de",
+      "previous": "Anterior",
+      "next": "Próxima"
+    }
   }
 }

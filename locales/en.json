@@ -76,5 +76,205 @@
       "previous": "Previous",
       "next": "Next"
     }
+  },
+  "accounts": {
+    "title": "Accounts",
+    "newAccount": "New Account",
+    "searchPlaceholder": "Search accounts...",
+    "filter": {
+      "allTypes": "All types"
+    },
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "type": "Type",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "types": {
+      "CASH": "Cash",
+      "BANK": "Bank",
+      "CREDIT_CARD": "Credit Card",
+      "INVESTMENT": "Investment"
+    },
+    "form": {
+      "title": "New Account",
+      "description": "Fill in the details below to create a new account.",
+      "name": "Name",
+      "namePlaceholder": "Enter account name",
+      "nameDescription": "Unique name to identify the account.",
+      "type": "Type",
+      "typeDescription": "Select the type of account.",
+      "save": "Save",
+      "saving": "Saving...",
+      "clear": "Clear"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete the account \"{name}\"? This action cannot be undone.",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "cancel": "Cancel",
+      "error": "Error deleting account",
+      "errorForeignKey": "Cannot delete this account because there are transactions associated with it",
+      "Cannot delete account because it is being used by transactions": "Cannot delete account because it is being used by transactions"
+    },
+    "edit": {
+      "title": "Edit Account",
+      "description": "Update the account details below.",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "error": "Error updating account",
+      "errorDuplicate": "An account with this name already exists"
+    },
+    "noResults": "No accounts found.",
+    "pagination": {
+      "page": "Page",
+      "of": "of",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "paymentMethods": {
+    "title": "Payment Methods",
+    "newMethod": "New Payment Method",
+    "searchPlaceholder": "Search payment methods...",
+    "table": {
+      "id": "ID",
+      "name": "Name",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "form": {
+      "title": "New Payment Method",
+      "description": "Fill in the details below to create a new payment method.",
+      "name": "Name",
+      "namePlaceholder": "Enter name",
+      "nameDescription": "Unique name to identify the payment method.",
+      "save": "Save",
+      "saving": "Saving...",
+      "clear": "Clear"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete the payment method \"{name}\"? This action cannot be undone.",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "cancel": "Cancel",
+      "error": "Error deleting payment method",
+      "errorForeignKey": "Cannot delete this payment method because there are transactions associated with it",
+      "Cannot delete payment method because it is being used by transactions": "Cannot delete payment method because it is being used by transactions"
+    },
+    "edit": {
+      "title": "Edit Payment Method",
+      "description": "Update the payment method details below.",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "error": "Error updating payment method",
+      "errorDuplicate": "A payment method with this name already exists"
+    },
+    "noResults": "No payment methods found.",
+    "pagination": {
+      "page": "Page",
+      "of": "of",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "newTransaction": "New Transaction",
+    "searchPlaceholder": "Search transactions...",
+    "filter": {
+      "allDirections": "All directions",
+      "allCategories": "All categories",
+      "allAccounts": "All accounts",
+      "allPaymentMethods": "All payment methods"
+    },
+    "table": {
+      "id": "ID",
+      "description": "Description",
+      "amount": "Amount",
+      "direction": "Direction",
+      "category": "Category",
+      "account": "Account",
+      "paymentMethod": "Payment Method",
+      "issueDate": "Issue Date",
+      "settlementDate": "Settlement Date",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "directions": {
+      "IN": "Income",
+      "OUT": "Expense"
+    },
+    "form": {
+      "title": "New Transaction",
+      "description": "Fill in the details below to create a new transaction.",
+      "transactionDescription": "Description",
+      "transactionDescriptionPlaceholder": "Enter description",
+      "transactionDescriptionHint": "Brief description of the transaction.",
+      "amount": "Amount",
+      "amountPlaceholder": "0.00",
+      "amountHint": "Value of the transaction.",
+      "direction": "Direction",
+      "directionHint": "Select if the transaction is an income or expense.",
+      "issueDate": "Issue Date",
+      "issueDateHint": "Date the transaction occurred.",
+      "settlementDate": "Settlement Date",
+      "settlementDateHint": "Date the transaction was paid/received.",
+      "category": "Category",
+      "categoryHint": "Select the category.",
+      "categoryPlaceholder": "Select a category",
+      "account": "Account",
+      "accountHint": "Select the account.",
+      "accountPlaceholder": "Select an account",
+      "paymentMethod": "Payment Method",
+      "paymentMethodHint": "Select the payment method.",
+      "paymentMethodPlaceholder": "Select a payment method",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes...",
+      "notesHint": "Optional details about the transaction.",
+      "save": "Save",
+      "saving": "Saving...",
+      "clear": "Clear"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "delete": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete the transaction \"{description}\"? This action cannot be undone.",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "cancel": "Cancel",
+      "error": "Error deleting transaction"
+    },
+    "edit": {
+      "title": "Edit Transaction",
+      "description": "Update the transaction details below.",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "error": "Error updating transaction"
+    },
+    "noResults": "No transactions found.",
+    "pagination": {
+      "page": "Page",
+      "of": "of",
+      "previous": "Previous",
+      "next": "Next"
+    }
   }
 }
