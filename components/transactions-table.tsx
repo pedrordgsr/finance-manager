@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSettings } from "@/components/settings-provider";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -83,6 +84,7 @@ export function TransactionsTable({
 
     const t = useTranslations('transactions');
     const locale = useLocale();
+    const { settings } = useSettings();
     const searchParams = useSearchParams();
 
     const currentDirectionFilter = searchParams.get("direction") || "";
@@ -91,7 +93,7 @@ export function TransactionsTable({
     const formatCurrency = (cents: number) => {
         return new Intl.NumberFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
             style: 'currency',
-            currency: 'BRL'
+            currency: settings.currency
         }).format(cents / 100);
     };
 

@@ -4,10 +4,10 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
-export function formatCurrency(cents: number, locale: string = "pt-BR") {
+export function formatCurrency(cents: number, locale: string = "pt-BR", currency: string = "BRL") {
   return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "BRL"
+    currency: currency
   }).format(cents / 100)
 }
 

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/ui/theme-toggle"
 import { LanguageToggle } from "@/components/ui/language-toggle"
-import { Receipt, FolderOpen, CreditCard, Wallet, BarChart3 } from "lucide-react"
+import { Receipt, FolderOpen, CreditCard, Wallet, BarChart3, Settings as SettingsIcon } from "lucide-react"
 import { useTranslations } from 'next-intl'
 
 export function AppSidebar() {
@@ -76,7 +76,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
         <SidebarGroup>
           <SidebarGroupLabel>{t('reports')}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -86,6 +85,22 @@ export function AppSidebar() {
                   <Link href="/reports/dre">
                     <BarChart3 />
                     <span>{t('dre')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>{t('settings')}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/settings">
+                    <SettingsIcon className="h-4 w-4" />
+                    <span>{t('settings')}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

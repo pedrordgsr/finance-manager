@@ -26,7 +26,8 @@
     "accounts": "Accounts",
     "paymentMethods": "Payment Methods",
     "reports": "Reports",
-    "dre": "DRE"
+    "dre": "DRE",
+    "settings": "Settings"
   },
   "dre": {
     "title": "DRE",
@@ -307,5 +308,12 @@
       "previous": "Previous",
       "next": "Next"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "currency": "Display Currency",
+    "currencyDescription": "Choose the currency that will be used to display values throughout the system.",
+    "selectCurrency": "Select currency"
   }
 }

@@ -26,7 +26,8 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency, formatDate } from "@/lib/utils"
+import { formatCurrency as formatCurrencyUtil, formatDate } from "@/lib/utils"
+import { useSettings } from "@/components/settings-provider"
 import { getDreData } from "./actions"
 import type { Category, Account, PaymentMethod, Transaction } from "@/generated/prisma/client"
 
@@ -51,7 +52,11 @@ type GroupByOption = "CATEGORY" | "ACCOUNT" | "PAYMENT_METHOD"
 export function DREView({ initialData, currentYear: initialYear }: DREViewProps) {
   const t = useTranslations("dre")
   const locale = useLocale()
+  const { settings } = useSettings()
   
+  const formatCurrency = (cents: number, loc: string) => {
+    return formatCurrencyUtil(cents, loc, settings.currency)
+  }
   const [year, setYear] = useState(initialYear)
   const [groupBy, setGroupBy] = useState<GroupByOption>("CATEGORY")
   const [data, setData] = useState(initialData)
