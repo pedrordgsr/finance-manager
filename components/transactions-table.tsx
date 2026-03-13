@@ -217,79 +217,106 @@ export function TransactionsTable({
 
     return (
         <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-                <Input
-                    placeholder={t('searchPlaceholder')}
-                    value={search}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="max-w-[200px]"
-                />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="flex flex-1 gap-2">
+                    <Input
+                        placeholder={t('searchPlaceholder')}
+                        value={search}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="flex-1 sm:max-w-[200px]"
+                    />
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline">
-                            {currentDirectionFilter ? t(`directions.${currentDirectionFilter}`) : t('filter.allDirections')}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => handleFilterChange("direction", "")}>
-                            {t('filter.allDirections')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFilterChange("direction", "IN")}>
-                            {t('directions.IN')}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleFilterChange("direction", "OUT")}>
-                            {t('directions.OUT')}
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button className="sm:hidden" size="icon">
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>{t('form.title')}</DialogTitle>
+                                <DialogDescription>{t('form.description')}</DialogDescription>
+                            </DialogHeader>
+                            <div className="mt-4">
+                                <TransactionForm
+                                    categories={categories}
+                                    accounts={accounts}
+                                    paymentMethods={paymentMethods}
+                                    onSuccess={() => router.refresh()}
+                                />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline">
-                            {currentCategoryFilter && categories.find(c => c.id.toString() === currentCategoryFilter)?.name
-                                || t('filter.allCategories')}
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="max-h-60 overflow-y-auto">
-                        <DropdownMenuItem onClick={() => handleFilterChange("categoryId", "")}>
-                            {t('filter.allCategories')}
-                        </DropdownMenuItem>
-                        {categories.map((c) => (
-                            <DropdownMenuItem key={c.id} onClick={() => handleFilterChange("categoryId", c.id.toString())}>
-                                {c.name}
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="whitespace-nowrap">
+                                {currentDirectionFilter ? t(`directions.${currentDirectionFilter}`) : t('filter.allDirections')}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => handleFilterChange("direction", "")}>
+                                {t('filter.allDirections')}
                             </DropdownMenuItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                            <DropdownMenuItem onClick={() => handleFilterChange("direction", "IN")}>
+                                {t('directions.IN')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleFilterChange("direction", "OUT")}>
+                                {t('directions.OUT')}
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
-                <div className="flex-1" />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="whitespace-nowrap">
+                                {currentCategoryFilter && categories.find(c => c.id.toString() === currentCategoryFilter)?.name
+                                    || t('filter.allCategories')}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="max-h-60 overflow-y-auto">
+                            <DropdownMenuItem onClick={() => handleFilterChange("categoryId", "")}>
+                                {t('filter.allCategories')}
+                            </DropdownMenuItem>
+                            {categories.map((c) => (
+                                <DropdownMenuItem key={c.id} onClick={() => handleFilterChange("categoryId", c.id.toString())}>
+                                    {c.name}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
 
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            {t('newTransaction')}
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>{t('form.title')}</DialogTitle>
-                            <DialogDescription>{t('form.description')}</DialogDescription>
-                        </DialogHeader>
-                        <div className="mt-4">
-                            <TransactionForm
-                                categories={categories}
-                                accounts={accounts}
-                                paymentMethods={paymentMethods}
-                                onSuccess={() => router.refresh()}
-                            />
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                <div className="hidden sm:block">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Plus className="h-4 w-4 mr-2" />
+                                {t('newTransaction')}
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>{t('form.title')}</DialogTitle>
+                                <DialogDescription>{t('form.description')}</DialogDescription>
+                            </DialogHeader>
+                            <div className="mt-4">
+                                <TransactionForm
+                                    categories={categories}
+                                    accounts={accounts}
+                                    paymentMethods={paymentMethods}
+                                    onSuccess={() => router.refresh()}
+                                />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
-            <div className="rounded-md border">
+            {/* Desktop Table */}
+            <div className="hidden md:block rounded-md border">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -297,7 +324,7 @@ export function TransactionsTable({
                             <TableHead>{t('table.description')}</TableHead>
                             <TableHead>{t('table.category')}</TableHead>
                             <TableHead>{t('table.amount')}</TableHead>
-                            <TableHead className="hidden md:table-cell">{t('table.account')}</TableHead>
+                            <TableHead className="hidden lg:table-cell">{t('table.account')}</TableHead>
                             <TableHead className="w-[100px]">{t('table.actions')}</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -330,7 +357,7 @@ export function TransactionsTable({
                                     <TableCell className={getDirectionClass(transaction.direction)}>
                                         {transaction.direction === "IN" ? "+" : "-"} {formatCurrency(transaction.amountCents)}
                                     </TableCell>
-                                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                                    <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                                         {transaction.account?.name || '-'}
                                     </TableCell>
                                     <TableCell>
@@ -357,6 +384,71 @@ export function TransactionsTable({
                         )}
                     </TableBody>
                 </Table>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-3">
+                {transactions.length === 0 ? (
+                    <div className="h-24 flex items-center justify-center rounded-md border text-sm text-muted-foreground">
+                        {t('noResults')}
+                    </div>
+                ) : (
+                    transactions.map((transaction) => (
+                        <div key={transaction.id} className="rounded-lg border bg-card p-4 shadow-sm">
+                            <div className="flex justify-between items-start mb-2">
+                                <div className="flex flex-col">
+                                    <span className="font-semibold text-base">{transaction.description}</span>
+                                    <span className="text-xs text-muted-foreground" suppressHydrationWarning>
+                                        {new Date(transaction.issueDate).toLocaleDateString(locale === 'pt' ? 'pt-BR' : 'en-US')}
+                                    </span>
+                                </div>
+                                <div className={getDirectionClass(transaction.direction)}>
+                                    <span className="text-lg font-bold">
+                                        {transaction.direction === "IN" ? "+" : "-"} {formatCurrency(transaction.amountCents)}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between mt-3">
+                                <div className="flex flex-wrap gap-1.5">
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 uppercase">
+                                        {transaction.category.name}
+                                    </Badge>
+                                    {transaction.account && (
+                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-secondary/50">
+                                            {transaction.account.name}
+                                        </Badge>
+                                    )}
+                                </div>
+                                
+                                <div className="flex gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8"
+                                        onClick={() => handleEditClick(transaction)}
+                                    >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={() => handleDeleteClick(transaction)}
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                </div>
+                            </div>
+                            
+                            {transaction.settlementDate && (
+                                <div className="mt-2 text-[10px] text-muted-foreground border-t pt-2" suppressHydrationWarning>
+                                    {t('table.settlementDate')}: {new Date(transaction.settlementDate).toLocaleDateString(locale === 'pt' ? 'pt-BR' : 'en-US')}
+                                </div>
+                            )}
+                        </div>
+                    ))
+                )}
             </div>
 
             {totalPages > 1 && (
@@ -429,7 +521,7 @@ export function TransactionsTable({
                             />
                         </Field>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <Field>
                                 <FieldLabel>{t("form.amount")} *</FieldLabel>
                                 <Input
@@ -444,25 +536,32 @@ export function TransactionsTable({
 
                             <Field>
                                 <FieldLabel>{t("form.direction")} *</FieldLabel>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-start" disabled={isEditing}>
-                                            {t(`directions.${editDirection}`)}
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-full">
-                                        <DropdownMenuItem onClick={() => setEditDirection("IN")}>
-                                            {t("directions.IN")}
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setEditDirection("OUT")}>
-                                            {t("directions.OUT")}
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                <div className="flex gap-1 p-1 bg-muted rounded-md border h-10">
+                                    <Button
+                                        type="button"
+                                        variant={editDirection === "OUT" ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className={`flex-1 ${editDirection === "OUT" ? "bg-background shadow-sm" : "text-muted-foreground hover:bg-background/50"}`}
+                                        onClick={() => setEditDirection("OUT")}
+                                        disabled={isEditing}
+                                    >
+                                        {t("directions.OUT")}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={editDirection === "IN" ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className={`flex-1 ${editDirection === "IN" ? "bg-background shadow-sm" : "text-muted-foreground hover:bg-background/50"}`}
+                                        onClick={() => setEditDirection("IN")}
+                                        disabled={isEditing}
+                                    >
+                                        {t("directions.IN")}
+                                    </Button>
+                                </div>
                             </Field>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <Field>
                                 <FieldLabel>{t("form.issueDate")} *</FieldLabel>
                                 <Input
@@ -503,17 +602,17 @@ export function TransactionsTable({
                             </DropdownMenu>
                         </Field>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <Field>
                                 <FieldLabel>{t("form.account")}</FieldLabel>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-start" disabled={isEditing}>
+                                        <Button variant="outline" className="w-full justify-start text-left font-normal" disabled={isEditing}>
                                             {editAccountId && accounts.find(a => a.id === editAccountId)?.name
                                                 || t("form.accountPlaceholder")}
                                         </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-full max-h-60 overflow-y-auto">
+                                    <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] max-h-60 overflow-y-auto">
                                         <DropdownMenuItem onClick={() => setEditAccountId(null)}>
                                             --
                                         </DropdownMenuItem>
@@ -530,12 +629,12 @@ export function TransactionsTable({
                                 <FieldLabel>{t("form.paymentMethod")}</FieldLabel>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="w-full justify-start" disabled={isEditing}>
+                                        <Button variant="outline" className="w-full justify-start text-left font-normal" disabled={isEditing}>
                                             {editPaymentMethodId && paymentMethods.find(a => a.id === editPaymentMethodId)?.name
                                                 || t("form.paymentMethodPlaceholder")}
                                         </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-full max-h-60 overflow-y-auto">
+                                    <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width] max-h-60 overflow-y-auto">
                                         <DropdownMenuItem onClick={() => setEditPaymentMethodId(null)}>
                                             --
                                         </DropdownMenuItem>
