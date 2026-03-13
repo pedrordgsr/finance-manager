@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Receipt, BarChart3, PlusCircle, Settings, FolderOpen, Wallet, CreditCard } from "lucide-react"
+import { Home, Receipt, BarChart3, PlusCircle, Settings, FolderOpen, Wallet, CreditCard } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import {
@@ -20,6 +20,11 @@ export function BottomNavbar() {
   const pathname = usePathname()
 
   const navItems = [
+    {
+      label: t("home"),
+      href: "/",
+      icon: Home,
+    },
     {
       label: t("transactions"),
       href: "/transactions",

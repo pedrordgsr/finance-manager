@@ -14,7 +14,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/ui/theme-toggle"
-import { Receipt, FolderOpen, CreditCard, Wallet, BarChart3, Settings as SettingsIcon } from "lucide-react"
+import { Home, Receipt, FolderOpen, CreditCard, Wallet, BarChart3, Settings as SettingsIcon } from "lucide-react"
 import { useTranslations } from 'next-intl'
 
 export function AppSidebar() {
@@ -28,6 +28,21 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/">
+                    <Home />
+                    <span>{t('home')}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         <SidebarGroup>
           <SidebarGroupLabel>{t('movements')}</SidebarGroupLabel>
           <SidebarGroupContent>

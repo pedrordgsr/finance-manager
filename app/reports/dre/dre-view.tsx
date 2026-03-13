@@ -12,7 +12,8 @@ import {
   TrendingDown,
   TrendingUp,
   Wallet,
-  ArrowRight
+  ArrowRight,
+  CreditCard
 } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { 
@@ -291,26 +292,20 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                     </TableCell>
                   </TableRow>
                   {expandedRows[`IN-${id}`] && (
-                    <TableRow className="bg-muted/5">
-                      <TableCell colSpan={months.length + 2} className="p-0">
-                        <div className="p-4 pl-12 space-y-2">
-                          {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).length === 0 ? (
-                            <p className="text-xs text-muted-foreground italic">{t("noTransactions")}</p>
-                          ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                              {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).map((tx: TransactionWithRelations) => (
-                                <div key={tx.id} className="text-[10px] p-2 rounded border bg-background flex justify-between items-center">
-                                  <div>
-                                    <p className="font-medium truncate max-w-[150px]">{tx.description}</p>
-                                    <p className="text-muted-foreground">{formatDate(tx.issueDate, locale)}</p>
-                                  </div>
-                                  <span className="text-green-600 font-semibold">{formatCurrency(tx.amountCents, locale)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
+                    <TableRow className="bg-muted/5 hover:bg-muted/5">
+                      <TableCell className="sticky left-0 bg-card z-10 border-b-0" />
+                      {row.transactions.map((monthTxs: TransactionWithRelations[], i: number) => (
+                        <TableCell key={i} className="align-top p-1 border-x border-muted/20">
+                          <MonthTransactionList 
+                            transactions={monthTxs}
+                            locale={locale}
+                            formatCurrency={formatCurrency}
+                            formatDate={formatDate}
+                            isIncome={true}
+                          />
+                        </TableCell>
+                      ))}
+                      <TableCell className="bg-muted/30 border-l border-muted/20" />
                     </TableRow>
                   )}
                 </Fragment>
@@ -349,26 +344,20 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                     </TableCell>
                   </TableRow>
                   {expandedRows[`OUT-${id}`] && (
-                    <TableRow className="bg-muted/5">
-                      <TableCell colSpan={months.length + 2} className="p-0">
-                        <div className="p-4 pl-12 space-y-2">
-                          {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).length === 0 ? (
-                            <p className="text-xs text-muted-foreground italic">{t("noTransactions")}</p>
-                          ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                              {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).map((tx: TransactionWithRelations) => (
-                                <div key={tx.id} className="text-[10px] p-2 rounded border bg-background flex justify-between items-center">
-                                  <div>
-                                    <p className="font-medium truncate max-w-[150px]">{tx.description}</p>
-                                    <p className="text-muted-foreground">{formatDate(tx.issueDate, locale)}</p>
-                                  </div>
-                                  <span className="text-red-600 font-semibold">{formatCurrency(tx.amountCents, locale)}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
+                    <TableRow className="bg-muted/5 hover:bg-muted/5">
+                      <TableCell className="sticky left-0 bg-card z-10 border-b-0" />
+                      {row.transactions.map((monthTxs: TransactionWithRelations[], i: number) => (
+                        <TableCell key={i} className="align-top p-1 border-x border-muted/20">
+                          <MonthTransactionList 
+                            transactions={monthTxs}
+                            locale={locale}
+                            formatCurrency={formatCurrency}
+                            formatDate={formatDate}
+                            isIncome={false}
+                          />
+                        </TableCell>
+                      ))}
+                      <TableCell className="bg-muted/30 border-l border-muted/20" />
                     </TableRow>
                   )}
                 </Fragment>
@@ -392,6 +381,57 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
       )}
     </div>
   )
+}
+
+// Adding a helper for a single month's desktop transactions
+function MonthTransactionList({ 
+  transactions, 
+  locale, 
+  formatCurrency, 
+  formatDate, 
+  isIncome 
+}: { 
+  transactions: TransactionWithRelations[], 
+  locale: string, 
+  formatCurrency: (cents: number, loc: string) => string, 
+  formatDate: (date: Date | string, loc: string) => string, 
+  isIncome: boolean
+}) {
+  if (transactions.length === 0) return null;
+
+  return (
+    <div className="space-y-1.5 py-2">
+      {transactions.map(tx => (
+        <div 
+          key={tx.id} 
+          className="group p-1.5 rounded border bg-background hover:border-primary/50 transition-all shadow-[0_1px_2px_rgba(0,0,0,0.05)] hover:shadow-sm"
+        >
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-start justify-between gap-1">
+              <span className="font-semibold text-[9px] leading-tight truncate flex-1" title={tx.description}>
+                {tx.description}
+              </span>
+              <span className={`text-[9px] font-bold shrink-0 ${isIncome ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(tx.amountCents, locale)}
+              </span>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-1 mt-0.5 opacity-70">
+              <span className="text-[8px] text-muted-foreground whitespace-nowrap">
+                {formatDate(tx.issueDate, locale)}
+              </span>
+              {tx.account && (
+                <div className="flex items-center text-[8px] text-muted-foreground truncate max-w-[50px]">
+                  <Wallet className="h-2 w-2 mr-0.5 shrink-0" />
+                  <span className="truncate">{tx.account.name}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 interface DREMobileProps {

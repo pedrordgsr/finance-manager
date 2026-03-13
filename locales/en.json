@@ -19,6 +19,7 @@
   },
   "sidebar": {
     "appName": "Finance Manager",
+    "home": "Home",
     "movements": "Movements",
     "transactions": "Transactions",
     "registers": "Registers",

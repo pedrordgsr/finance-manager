@@ -19,6 +19,7 @@
   },
   "sidebar": {
     "appName": "Finance Manager",
+    "home": "Início",
     "movements": "Movimentações",
     "transactions": "Transações",
     "registers": "Cadastros",
