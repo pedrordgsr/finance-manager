@@ -8,8 +8,13 @@ import {
   ChevronUp,
   Filter,
   CalendarDays,
-  LayoutGrid
+  LayoutGrid,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+  ArrowRight
 } from "lucide-react"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { 
   Table, 
   TableBody, 
@@ -54,6 +59,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
   const locale = useLocale()
   const { settings } = useSettings()
   
+  const isMobile = useIsMobile()
   const formatCurrency = (cents: number, loc: string) => {
     return formatCurrencyUtil(cents, loc, settings.currency)
   }
@@ -175,22 +181,21 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
   }, [groupedData])
 
   return (
-    <div className="flex flex-col h-full gap-6 overflow-hidden">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="flex flex-col h-full gap-4 md:gap-6 overflow-hidden">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between py-2">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("subtitle")}</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="hidden md:block text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Year Select */}
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{t("year")}:</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="w-[100px]" disabled={isLoading}>
-                  {year} <ChevronDown className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="w-[80px] md:w-[100px]" disabled={isLoading}>
+                  {year} <ChevronDown className="ml-1 h-3 w-3 md:ml-2 md:h-4 md:w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -206,11 +211,10 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
           {/* Group By Select */}
           <div className="flex items-center gap-2">
             <LayoutGrid className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{t("groupBy")}:</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="w-[180px]" disabled={isLoading}>
-                  {t(`groupOptions.${groupBy}`)} <ChevronDown className="ml-2 h-4 w-4" />
+                <Button variant="outline" size="sm" className="w-[120px] md:w-[180px]" disabled={isLoading}>
+                  <span className="truncate">{t(`groupOptions.${groupBy}`)}</span> <ChevronDown className="ml-1 h-3 w-3 md:ml-2 md:h-4 md:w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -229,148 +233,357 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto rounded-md border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="sticky left-0 bg-card z-10 w-[200px] min-w-[200px]">{t("category")}</TableHead>
-              {months.map((month, i) => (
-                <TableHead key={i} className="text-right min-w-[120px]">{month}</TableHead>
+      {isMobile ? (
+        <DREMobile 
+          months={months}
+          groupedData={groupedData}
+          totals={totals}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+          locale={locale}
+          expandedRows={expandedRows}
+          toggleRow={toggleRow}
+          t={t}
+        />
+      ) : (
+        <div className="flex-1 overflow-auto rounded-md border bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="sticky left-0 bg-card z-10 w-[200px] min-w-[200px]">{t("category")}</TableHead>
+                {months.map((month, i) => (
+                  <TableHead key={i} className="text-right min-w-[120px]">{month}</TableHead>
+                ))}
+                <TableHead className="text-right font-bold bg-muted/30 min-w-[140px]">{t("total")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* INCOME SECTION */}
+              <TableRow className="bg-muted/50 font-bold hover:bg-muted/70 cursor-pointer" onClick={() => toggleRow("income-section")}>
+                <TableCell className="sticky left-0 bg-inherit z-10 flex items-center gap-2 py-3">
+                  {expandedRows["income-section"] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {t("income")}
+                </TableCell>
+                {months.map((_, i) => (
+                  <TableCell key={i} className="text-right text-green-600 dark:text-green-400">
+                    {formatCurrency(totals.IN[i], locale)}
+                  </TableCell>
+                ))}
+                <TableCell className="text-right bg-muted/30 text-green-600 dark:text-green-400">
+                  {formatCurrency(totals.IN.reduce((a, b) => a + b, 0), locale)}
+                </TableCell>
+              </TableRow>
+
+              {expandedRows["income-section"] && Object.entries(groupedData.IN).map(([id, row]) => (
+                <Fragment key={id}>
+                  <TableRow key={id} className="hover:bg-muted/30 cursor-pointer" onClick={() => toggleRow(`IN-${id}`)}>
+                    <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2">
+                      {expandedRows[`IN-${id}`] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      {row.label}
+                    </TableCell>
+                    {row.values.map((val: number, i: number) => (
+                      <TableCell key={i} className="text-right text-sm">
+                        {val > 0 ? formatCurrency(val, locale) : "-"}
+                      </TableCell>
+                    ))}
+                    <TableCell className="text-right bg-muted/20 text-sm font-medium">
+                      {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  </TableRow>
+                  {expandedRows[`IN-${id}`] && (
+                    <TableRow className="bg-muted/5">
+                      <TableCell colSpan={months.length + 2} className="p-0">
+                        <div className="p-4 pl-12 space-y-2">
+                          {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).length === 0 ? (
+                            <p className="text-xs text-muted-foreground italic">{t("noTransactions")}</p>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).map((tx: TransactionWithRelations) => (
+                                <div key={tx.id} className="text-[10px] p-2 rounded border bg-background flex justify-between items-center">
+                                  <div>
+                                    <p className="font-medium truncate max-w-[150px]">{tx.description}</p>
+                                    <p className="text-muted-foreground">{formatDate(tx.issueDate, locale)}</p>
+                                  </div>
+                                  <span className="text-green-600 font-semibold">{formatCurrency(tx.amountCents, locale)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
               ))}
-              <TableHead className="text-right font-bold bg-muted/30 min-w-[140px]">{t("total")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* INCOME SECTION */}
-            <TableRow className="bg-muted/50 font-bold hover:bg-muted/70 cursor-pointer" onClick={() => toggleRow("income-section")}>
-              <TableCell className="sticky left-0 bg-inherit z-10 flex items-center gap-2 py-3">
-                {expandedRows["income-section"] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+
+              {/* EXPENSE SECTION */}
+              <TableRow className="bg-muted/50 font-bold hover:bg-muted/70 cursor-pointer" onClick={() => toggleRow("expense-section")}>
+                <TableCell className="sticky left-0 bg-inherit z-10 flex items-center gap-2 py-3">
+                  {expandedRows["expense-section"] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {t("expense")}
+                </TableCell>
+                {months.map((_, i) => (
+                  <TableCell key={i} className="text-right text-red-600 dark:text-red-400">
+                    {formatCurrency(totals.OUT[i], locale)}
+                  </TableCell>
+                ))}
+                <TableCell className="text-right bg-muted/30 text-red-600 dark:text-red-400">
+                  {formatCurrency(totals.OUT.reduce((a, b) => a + b, 0), locale)}
+                </TableCell>
+              </TableRow>
+
+              {expandedRows["expense-section"] && Object.entries(groupedData.OUT).map(([id, row]) => (
+                <Fragment key={id}>
+                  <TableRow key={id} className="hover:bg-muted/30 cursor-pointer" onClick={() => toggleRow(`OUT-${id}`)}>
+                    <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2">
+                      {expandedRows[`OUT-${id}`] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                      {row.label}
+                    </TableCell>
+                    {row.values.map((val: number, i: number) => (
+                      <TableCell key={i} className="text-right text-sm">
+                        {val > 0 ? formatCurrency(val, locale) : "-"}
+                      </TableCell>
+                    ))}
+                    <TableCell className="text-right bg-muted/20 text-sm font-medium">
+                      {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  </TableRow>
+                  {expandedRows[`OUT-${id}`] && (
+                    <TableRow className="bg-muted/5">
+                      <TableCell colSpan={months.length + 2} className="p-0">
+                        <div className="p-4 pl-12 space-y-2">
+                          {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).length === 0 ? (
+                            <p className="text-xs text-muted-foreground italic">{t("noTransactions")}</p>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).map((tx: TransactionWithRelations) => (
+                                <div key={tx.id} className="text-[10px] p-2 rounded border bg-background flex justify-between items-center">
+                                  <div>
+                                    <p className="font-medium truncate max-w-[150px]">{tx.description}</p>
+                                    <p className="text-muted-foreground">{formatDate(tx.issueDate, locale)}</p>
+                                  </div>
+                                  <span className="text-red-600 font-semibold">{formatCurrency(tx.amountCents, locale)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              ))}
+
+              {/* NET PROFIT */}
+              <TableRow className="bg-muted font-bold hover:bg-muted border-t-2">
+                <TableCell className="sticky left-0 bg-inherit z-10 py-4">{t("netProfit")}</TableCell>
+                {months.map((_, i) => (
+                  <TableCell key={i} className={`text-right ${groupedData.net[i] >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {formatCurrency(groupedData.net[i], locale)}
+                  </TableCell>
+                ))}
+                <TableCell className={`text-right bg-muted/30 ${groupedData.net.reduce((a, b) => a + b, 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                  {formatCurrency(groupedData.net.reduce((a, b) => a + b, 0), locale)}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface DREMobileProps {
+  months: string[]
+  groupedData: any
+  totals: any
+  formatCurrency: (cents: number, loc: string) => string
+  formatDate: (date: Date | string, loc: string) => string
+  locale: string
+  expandedRows: Record<string, boolean>
+  toggleRow: (id: string) => void
+  t: any
+}
+
+function DREMobile({ 
+  months, 
+  groupedData, 
+  totals, 
+  formatCurrency, 
+  formatDate, 
+  locale, 
+  expandedRows, 
+  toggleRow, 
+  t 
+}: DREMobileProps) {
+  const currentMonthIdx = new Date().getMonth()
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthIdx)
+
+  const incomeRows = Object.entries(groupedData.IN)
+  const expenseRows = Object.entries(groupedData.OUT)
+
+  return (
+    <div className="flex flex-col gap-4 overflow-hidden h-full pb-4">
+      {/* Horizontal Month Selector */}
+      <div className="w-full pb-2 overflow-x-auto no-scrollbar flex gap-2">
+        {months.map((month, i) => (
+          <Button
+            key={i}
+            variant={selectedMonth === i ? "default" : "outline"}
+            size="sm"
+            className="px-6 rounded-full flex-shrink-0"
+            onClick={() => setSelectedMonth(i)}
+          >
+            {month}
+          </Button>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-y-auto pr-1">
+        <div className="space-y-6">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 gap-3">
+            <div className="rounded-xl border border-green-100 dark:border-green-950/50 bg-green-50/30 dark:bg-green-950/10 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">{t("income")}</p>
+                  <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                    {formatCurrency(totals.IN[selectedMonth], locale)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-red-100 dark:border-red-950/50 bg-red-50/30 dark:bg-red-950/10 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                  <TrendingDown className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">{t("expense")}</p>
+                  <p className="text-lg font-bold text-red-600 dark:text-red-400">
+                    {formatCurrency(totals.OUT[selectedMonth], locale)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-primary/10 bg-primary/5 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-primary/10 text-primary">
+                  <Wallet className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase">{t("netProfit")}</p>
+                  <p className={`text-lg font-bold ${groupedData.net[selectedMonth] >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                    {formatCurrency(groupedData.net[selectedMonth], locale)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Lists */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold mb-2 px-1 flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-green-600" />
                 {t("income")}
-              </TableCell>
-              {months.map((_, i) => (
-                <TableCell key={i} className="text-right text-green-600 dark:text-green-400">
-                  {formatCurrency(totals.IN[i], locale)}
-                </TableCell>
-              ))}
-              <TableCell className="text-right bg-muted/30 text-green-600 dark:text-green-400">
-                {formatCurrency(totals.IN.reduce((a, b) => a + b, 0), locale)}
-              </TableCell>
-            </TableRow>
-
-            {expandedRows["income-section"] && Object.entries(groupedData.IN).map(([id, row]) => (
-              <Fragment key={id}>
-                <TableRow key={id} className="hover:bg-muted/30 cursor-pointer" onClick={() => toggleRow(`IN-${id}`)}>
-                  <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2">
-                    {expandedRows[`IN-${id}`] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                    {row.label}
-                  </TableCell>
-                  {row.values.map((val: number, i: number) => (
-                    <TableCell key={i} className="text-right text-sm">
-                      {val > 0 ? formatCurrency(val, locale) : "-"}
-                    </TableCell>
-                  ))}
-                  <TableCell className="text-right bg-muted/20 text-sm font-medium">
-                    {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
-                  </TableCell>
-                </TableRow>
-                {expandedRows[`IN-${id}`] && (
-                  <TableRow className="bg-muted/5">
-                    <TableCell colSpan={months.length + 2} className="p-0">
-                      <div className="p-4 pl-12 space-y-2">
-                        {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).length === 0 ? (
-                          <p className="text-xs text-muted-foreground italic">{t("noTransactions")}</p>
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).map((tx: TransactionWithRelations) => (
-                              <div key={tx.id} className="text-[10px] p-2 rounded border bg-background flex justify-between items-center">
+              </h3>
+              <div className="space-y-2">
+                {incomeRows.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic px-1">{t("noTransactions")}</p>
+                ) : (
+                  incomeRows.map(([id, row]: [string, any]) => (
+                    <div key={id} className="rounded-lg border bg-card overflow-hidden">
+                      <button 
+                        className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                        onClick={() => toggleRow(`mobile-IN-${id}`)}
+                      >
+                        <div className="flex items-center gap-2">
+                          {expandedRows[`mobile-IN-${id}`] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          <span className="text-sm font-medium">{row.label}</span>
+                        </div>
+                        <span className="text-sm font-bold text-green-600">
+                          {formatCurrency(row.values[selectedMonth], locale)}
+                        </span>
+                      </button>
+                      
+                      {expandedRows[`mobile-IN-${id}`] && (
+                        <div className="border-t bg-muted/20 p-2 space-y-2">
+                          {row.transactions[selectedMonth].length === 0 ? (
+                            <p className="text-[10px] text-muted-foreground italic p-2 text-center">{t("noTransactions")}</p>
+                          ) : (
+                            row.transactions[selectedMonth].map((tx: any) => (
+                              <div key={tx.id} className="flex items-center justify-between p-2 bg-background rounded border text-[10px]">
                                 <div>
-                                  <p className="font-medium truncate max-w-[150px]">{tx.description}</p>
+                                  <p className="font-medium">{tx.description}</p>
                                   <p className="text-muted-foreground">{formatDate(tx.issueDate, locale)}</p>
                                 </div>
-                                <span className="text-green-600 font-semibold">{formatCurrency(tx.amountCents, locale)}</span>
+                                <span className="font-semibold text-green-600">{formatCurrency(tx.amountCents, locale)}</span>
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
                 )}
-              </Fragment>
-            ))}
+              </div>
+            </div>
 
-            {/* EXPENSE SECTION */}
-            <TableRow className="bg-muted/50 font-bold hover:bg-muted/70 cursor-pointer" onClick={() => toggleRow("expense-section")}>
-              <TableCell className="sticky left-0 bg-inherit z-10 flex items-center gap-2 py-3">
-                {expandedRows["expense-section"] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <div>
+              <h3 className="text-sm font-semibold mb-2 px-1 flex items-center gap-2">
+                <TrendingDown className="h-4 w-4 text-red-600" />
                 {t("expense")}
-              </TableCell>
-              {months.map((_, i) => (
-                <TableCell key={i} className="text-right text-red-600 dark:text-red-400">
-                  {formatCurrency(totals.OUT[i], locale)}
-                </TableCell>
-              ))}
-              <TableCell className="text-right bg-muted/30 text-red-600 dark:text-red-400">
-                {formatCurrency(totals.OUT.reduce((a, b) => a + b, 0), locale)}
-              </TableCell>
-            </TableRow>
-
-            {expandedRows["expense-section"] && Object.entries(groupedData.OUT).map(([id, row]) => (
-              <Fragment key={id}>
-                <TableRow key={id} className="hover:bg-muted/30 cursor-pointer" onClick={() => toggleRow(`OUT-${id}`)}>
-                  <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2">
-                    {expandedRows[`OUT-${id}`] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                    {row.label}
-                  </TableCell>
-                  {row.values.map((val: number, i: number) => (
-                    <TableCell key={i} className="text-right text-sm">
-                      {val > 0 ? formatCurrency(val, locale) : "-"}
-                    </TableCell>
-                  ))}
-                  <TableCell className="text-right bg-muted/20 text-sm font-medium">
-                    {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
-                  </TableCell>
-                </TableRow>
-                {expandedRows[`OUT-${id}`] && (
-                  <TableRow className="bg-muted/5">
-                    <TableCell colSpan={months.length + 2} className="p-0">
-                      <div className="p-4 pl-12 space-y-2">
-                        {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).length === 0 ? (
-                          <p className="text-xs text-muted-foreground italic">{t("noTransactions")}</p>
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                            {row.transactions.flatMap((txs: TransactionWithRelations[]) => txs).map((tx: TransactionWithRelations) => (
-                              <div key={tx.id} className="text-[10px] p-2 rounded border bg-background flex justify-between items-center">
+              </h3>
+              <div className="space-y-2">
+                {expenseRows.length === 0 ? (
+                  <p className="text-xs text-muted-foreground italic px-1">{t("noTransactions")}</p>
+                ) : (
+                  expenseRows.map(([id, row]: [string, any]) => (
+                    <div key={id} className="rounded-lg border bg-card overflow-hidden">
+                      <button 
+                        className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                        onClick={() => toggleRow(`mobile-OUT-${id}`)}
+                      >
+                        <div className="flex items-center gap-2">
+                          {expandedRows[`mobile-OUT-${id}`] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                          <span className="text-sm font-medium">{row.label}</span>
+                        </div>
+                        <span className="text-sm font-bold text-red-600">
+                          {formatCurrency(row.values[selectedMonth], locale)}
+                        </span>
+                      </button>
+                      
+                      {expandedRows[`mobile-OUT-${id}`] && (
+                        <div className="border-t bg-muted/20 p-2 space-y-2">
+                          {row.transactions[selectedMonth].length === 0 ? (
+                            <p className="text-[10px] text-muted-foreground italic p-2 text-center">{t("noTransactions")}</p>
+                          ) : (
+                            row.transactions[selectedMonth].map((tx: any) => (
+                              <div key={tx.id} className="flex items-center justify-between p-2 bg-background rounded border text-[10px]">
                                 <div>
-                                  <p className="font-medium truncate max-w-[150px]">{tx.description}</p>
+                                  <p className="font-medium">{tx.description}</p>
                                   <p className="text-muted-foreground">{formatDate(tx.issueDate, locale)}</p>
                                 </div>
-                                <span className="text-red-600 font-semibold">{formatCurrency(tx.amountCents, locale)}</span>
+                                <span className="font-semibold text-red-600">{formatCurrency(tx.amountCents, locale)}</span>
                               </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
                 )}
-              </Fragment>
-            ))}
-
-            {/* NET PROFIT */}
-            <TableRow className="bg-muted font-bold hover:bg-muted border-t-2">
-              <TableCell className="sticky left-0 bg-inherit z-10 py-4">{t("netProfit")}</TableCell>
-              {months.map((_, i) => (
-                <TableCell key={i} className={`text-right ${groupedData.net[i] >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                  {formatCurrency(groupedData.net[i], locale)}
-                </TableCell>
-              ))}
-              <TableCell className={`text-right bg-muted/30 ${groupedData.net.reduce((a, b) => a + b, 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                {formatCurrency(groupedData.net.reduce((a, b) => a + b, 0), locale)}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

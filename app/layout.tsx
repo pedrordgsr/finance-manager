@@ -23,6 +23,8 @@ export const metadata: Metadata = {
 
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { BottomNavbar } from "@/components/bottom-navbar"
+
 
 export default async function RootLayout({
   children,
@@ -51,11 +53,13 @@ export default async function RootLayout({
             <header className="flex h-10 shrink-0 items-center justify-between gap-2 border-b px-4">
               <SidebarTrigger />
             </header>
-            <main className="flex flex-1 flex-col min-h-0 overflow-auto">
+            <main className="flex flex-1 flex-col min-h-0 overflow-auto pb-24 md:pb-0">
               {children}
             </main>
+            <BottomNavbar />
           </SidebarInset>
         </SidebarProvider>
+
         </SettingsProvider>
         </ThemeProvider>
         </NextIntlClientProvider>
