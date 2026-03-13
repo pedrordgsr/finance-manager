@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { BottomNavbar } from "@/components/bottom-navbar"
-
+import { Chatbot } from "@/components/chatbot"
 
 export default async function RootLayout({
   children,
@@ -59,7 +59,7 @@ export default async function RootLayout({
             <BottomNavbar />
           </SidebarInset>
         </SidebarProvider>
-
+        <Chatbot />
         </SettingsProvider>
         </ThemeProvider>
         </NextIntlClientProvider>
