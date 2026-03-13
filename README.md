@@ -61,22 +61,14 @@ Certifique-se de ter instalado em sua máquina:
    pnpm install
    ```
 
-3. Configure as variáveis de ambiente:
-   Crie um arquivo `.env` na raiz do projeto (se necessário) de acordo com o padrão esperado pelo Prisma, ex:
-   ```env
-   DATABASE_URL="file:./dev.db"
-   ```
-
-4. Prepare o Banco de Dados (Prisma):
-   Execute as migrações ou crie o banco a partir do schema:
+3. Prepare o Banco de Dados (Prisma):
+   A aplicação utiliza um banco de dados SQLite local (`prisma/finance_db.db`), eliminando a necessidade de configurar variáveis de ambiente para o banco. Execute o comando abaixo para criar o banco e sincronizar o schema:
    ```bash
-   npx prisma db push
-   # ou
-   npx prisma migrate dev
+   npx prisma db push --force-reset
    ```
 
-5. Popular o Banco de Dados (Seed):
-   Opcionalmente, rode o script de seed para criar dados iniciais (contas, categorias, transações, etc.):
+4. Popular o Banco de Dados (Seed):
+   Opcionalmente (recomendado), rode o script de seed para criar dados iniciais (contas, categorias, transações, etc.) no seu novo banco local:
    ```bash
    npm run db:seed
    ```

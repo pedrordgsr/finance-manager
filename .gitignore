@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 /generated/prisma
+
+# SQLite database files
+/prisma/finance_db.db
+/prisma/finance_db.db-journal
+/prisma/finance_db.db-wal
+/prisma/finance_db.db-shm
