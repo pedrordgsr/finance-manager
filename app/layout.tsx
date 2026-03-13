@@ -51,7 +51,7 @@ export default async function RootLayout({
           <AppSidebar />
           <SidebarInset className="h-svh overflow-hidden">
             <header className="flex h-10 shrink-0 items-center justify-between gap-2 border-b px-4">
-              <SidebarTrigger />
+              <SidebarTrigger className="hidden md:flex" />
             </header>
             <main className="flex flex-1 flex-col min-h-0 overflow-auto pb-24 md:pb-0">
               {children}

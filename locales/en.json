@@ -314,6 +314,8 @@
     "appearance": "Appearance",
     "currency": "Display Currency",
     "currencyDescription": "Choose the currency that will be used to display values throughout the system.",
-    "selectCurrency": "Select currency"
+    "selectCurrency": "Select currency",
+    "language": "Language",
+    "languageDescription": "Choose the system language."
   }
 }

@@ -14,7 +14,6 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { ModeToggle } from "@/components/ui/theme-toggle"
-import { LanguageToggle } from "@/components/ui/language-toggle"
 import { Receipt, FolderOpen, CreditCard, Wallet, BarChart3, Settings as SettingsIcon } from "lucide-react"
 import { useTranslations } from 'next-intl'
 
@@ -111,7 +110,6 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="p-4 flex gap-2">
           <ModeToggle />
-          <LanguageToggle />
         </div>
       </SidebarFooter>
     </Sidebar>
