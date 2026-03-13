@@ -24,7 +24,27 @@
     "registers": "Registers",
     "categories": "Categories",
     "accounts": "Accounts",
-    "paymentMethods": "Payment Methods"
+    "paymentMethods": "Payment Methods",
+    "reports": "Reports",
+    "dre": "DRE"
+  },
+  "dre": {
+    "title": "DRE",
+    "subtitle": "Income Statement",
+    "category": "Category",
+    "total": "Total",
+    "income": "Income",
+    "expense": "Expense",
+    "netProfit": "Net Profit",
+    "other": "Other",
+    "noTransactions": "No transactions",
+    "groupBy": "Group by",
+    "year": "Year",
+    "groupOptions": {
+      "CATEGORY": "Category",
+      "ACCOUNT": "Account",
+      "PAYMENT_METHOD": "Payment Method"
+    }
   },
   "categories": {
     "title": "Categories",

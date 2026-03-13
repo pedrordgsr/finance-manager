@@ -24,7 +24,27 @@
     "registers": "Cadastros",
     "categories": "Categorias",
     "accounts": "Contas",
-    "paymentMethods": "Formas de Pagamento"
+    "paymentMethods": "Formas de Pagamento",
+    "reports": "Relatórios",
+    "dre": "DRE"
+  },
+  "dre": {
+    "title": "DRE",
+    "subtitle": "Demonstrativo de Resultados do Exercício",
+    "category": "Categoria",
+    "total": "Total",
+    "income": "Receitas",
+    "expense": "Despesas",
+    "netProfit": "Resultado Líquido",
+    "other": "Outros",
+    "noTransactions": "Nenhuma transação",
+    "groupBy": "Agrupar por",
+    "year": "Ano",
+    "groupOptions": {
+      "CATEGORY": "Categoria",
+      "ACCOUNT": "Conta",
+      "PAYMENT_METHOD": "Forma de Pagamento"
+    }
   },
   "categories": {
     "title": "Categorias",
