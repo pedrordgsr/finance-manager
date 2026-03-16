@@ -57,6 +57,11 @@
       "ACTUAL": "Realizado",
       "BUDGET": "Orçado",
       "BOTH": "Comparativo"
+    },
+    "accountingMode": "Regime",
+    "accountingModes": {
+      "ACCRUAL": "Competência",
+      "CASH": "Caixa"
     }
   },
   "categories": {

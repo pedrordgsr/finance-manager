@@ -57,6 +57,11 @@
       "ACTUAL": "Actual",
       "BUDGET": "Budget",
       "BOTH": "Comparison"
+    },
+    "accountingMode": "Accounting Basis",
+    "accountingModes": {
+      "ACCRUAL": "Accrual",
+      "CASH": "Cash"
     }
   },
   "categories": {

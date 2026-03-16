@@ -70,6 +70,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
   const [year, setYear] = useState(initialYear)
   const [groupBy, setGroupBy] = useState<GroupByOption>("CATEGORY")
   const [viewMode, setViewMode] = useState<ViewMode>("ACTUAL")
+  const [accountingMode, setAccountingMode] = useState<"ACCRUAL" | "CASH">("ACCRUAL")
   const [data, setData] = useState(initialData)
   const [isLoading, setIsLoading] = useState(false)
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
@@ -88,11 +89,12 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
     return yearsArr
   }, [])
 
-  const handleYearChange = async (newYear: number) => {
+  const handleYearChange = async (newYear: number, newAccountingMode: "ACCRUAL" | "CASH" = accountingMode) => {
     setIsLoading(true)
     setYear(newYear)
+    setAccountingMode(newAccountingMode)
     try {
-      const newData = await getDreData(newYear)
+      const newData = await getDreData(newYear, newAccountingMode)
       setData(newData)
     } finally {
       setIsLoading(false)
@@ -141,7 +143,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
     result.OUT["other"] = { label: otherLabel, values: Array(12).fill(0), budgets: Array(12).fill(0), transactions: Array.from({ length: 12 }, () => []) }
 
     data.transactions.forEach(tx => {
-      const date = new Date(tx.issueDate)
+      const date = new Date(accountingMode === "ACCRUAL" ? tx.issueDate : (tx.settlementDate || tx.issueDate))
       const monthIdx = date.getMonth()
       const direction = tx.direction as "IN" | "OUT"
       
@@ -275,6 +277,22 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
               ))}
             </div>
           )}
+
+          {/* Accounting Mode Select (Desktop & Mobile) */}
+          <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg">
+            {(["ACCRUAL", "CASH"] as const).map((m) => (
+              <Button
+                key={m}
+                variant={accountingMode === m ? "default" : "ghost"}
+                size="sm"
+                className="h-8 px-3 text-xs"
+                onClick={() => handleYearChange(year, m)}
+                disabled={isLoading}
+              >
+                {t(`accountingModes.${m}`)}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -291,6 +309,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
             t={t}
             year={year}
             setData={setData}
+            accountingMode={accountingMode}
           />
       ) : (
         <div className="flex-1 overflow-auto rounded-md border bg-card">
@@ -431,6 +450,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                             formatCurrency={formatCurrency}
                             formatDate={formatDate}
                             isIncome={true}
+                            accountingMode={accountingMode}
                           />
                         </TableCell>
                       ))}
@@ -539,6 +559,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                             formatCurrency={formatCurrency}
                             formatDate={formatDate}
                             isIncome={false}
+                            accountingMode={accountingMode}
                           />
                         </TableCell>
                       ))}
@@ -592,13 +613,15 @@ function MonthTransactionList({
   locale, 
   formatCurrency, 
   formatDate, 
-  isIncome 
+  isIncome,
+  accountingMode
 }: { 
   transactions: TransactionWithRelations[], 
   locale: string, 
   formatCurrency: (cents: number, loc: string) => string, 
   formatDate: (date: Date | string, loc: string) => string, 
-  isIncome: boolean
+  isIncome: boolean,
+  accountingMode: "ACCRUAL" | "CASH"
 }) {
   if (transactions.length === 0) return null;
 
@@ -621,7 +644,7 @@ function MonthTransactionList({
             
             <div className="flex flex-wrap items-center gap-1 mt-0.5 opacity-70">
               <span className="text-[8px] text-muted-foreground whitespace-nowrap">
-                {formatDate(tx.issueDate, locale)}
+                {formatDate(accountingMode === "ACCRUAL" ? tx.issueDate : (tx.settlementDate || tx.issueDate), locale)}
               </span>
               {tx.account && (
                 <div className="flex items-center text-[8px] text-muted-foreground truncate max-w-[50px]">
@@ -649,6 +672,7 @@ interface DREMobileProps {
   t: any
   year: number
   setData: (data: any) => void
+  accountingMode: "ACCRUAL" | "CASH"
 }
 
 function DREMobile({ 
@@ -662,7 +686,8 @@ function DREMobile({
   toggleRow, 
   t,
   year,
-  setData
+  setData,
+  accountingMode
 }: DREMobileProps) {
   const currentMonthIdx = new Date().getMonth()
   const [selectedMonth, setSelectedMonth] = useState(currentMonthIdx)
