@@ -28,7 +28,23 @@
     "paymentMethods": "Payment Methods",
     "reports": "Reports",
     "dre": "DRE",
+    "payablesReceivables": "Payables/Receivables",
     "settings": "Settings"
+  },
+  "payablesReceivables": {
+    "title": "Accounts Payable and Receivable",
+    "subtitle": "Track obligations and rights not yet settled",
+    "receivable": "Receivable",
+    "payable": "Payable",
+    "receivableTotal": "Total Receivable",
+    "payableTotal": "Total Payable",
+    "description": "Description",
+    "category": "Category",
+    "issueDate": "Issue Date",
+    "amount": "Amount",
+    "noPending": "No pending accounts.",
+    "receivableDescription": "Income recorded but not yet received",
+    "payableDescription": "Expenses recorded but not yet paid"
   },
   "dre": {
     "title": "DRE",
@@ -248,7 +264,10 @@
       "allDirections": "All directions",
       "allCategories": "All categories",
       "allAccounts": "All accounts",
-      "allPaymentMethods": "All payment methods"
+      "allPaymentMethods": "All payment methods",
+      "allSettled": "All settlement status",
+      "settled": "Settled",
+      "notSettled": "Not Settled"
     },
     "table": {
       "id": "ID",
@@ -300,7 +319,8 @@
     },
     "actions": {
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "settle": "Settle"
     },
     "delete": {
       "title": "Confirm deletion",
@@ -317,6 +337,15 @@
       "saving": "Saving...",
       "cancel": "Cancel",
       "error": "Error updating transaction"
+    },
+    "settle": {
+      "title": "Settle Transaction",
+      "description": "Select the date when the transaction was actually settled.",
+      "date": "Settlement Date",
+      "confirm": "Settle",
+      "settling": "Settling...",
+      "cancel": "Cancel",
+      "error": "Error settling transaction"
     },
     "noResults": "No transactions found.",
     "pagination": {

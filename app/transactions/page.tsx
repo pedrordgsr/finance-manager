@@ -10,6 +10,7 @@ interface TransactionsPageProps {
         categoryId?: string
         accountId?: string
         paymentMethodId?: string
+        settled?: string
     }>
 }
 
@@ -24,6 +25,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
     const categoryId = params.categoryId || ""
     const accountId = params.accountId || ""
     const paymentMethodId = params.paymentMethodId || ""
+    const settled = params.settled || ""
 
     const where: any = {}
 
@@ -45,6 +47,12 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
 
     if (paymentMethodId) {
         where.paymentMethodId = parseInt(paymentMethodId)
+    }
+
+    if (settled === "true") {
+        where.settlementDate = { not: null }
+    } else if (settled === "false") {
+        where.settlementDate = null
     }
 
     const [

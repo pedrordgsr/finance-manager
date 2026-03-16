@@ -28,7 +28,23 @@
     "paymentMethods": "Formas de Pagamento",
     "reports": "Relatórios",
     "dre": "DRE",
+    "payablesReceivables": "A Pagar/Receber",
     "settings": "Configurações"
+  },
+  "payablesReceivables": {
+    "title": "Contas a Pagar e Receber",
+    "subtitle": "Acompanhamento de obrigações e direitos ainda não liquidados",
+    "receivable": "A Receber",
+    "payable": "A Pagar",
+    "receivableTotal": "Total a Receber",
+    "payableTotal": "Total a Pagar",
+    "description": "Descrição",
+    "category": "Categoria",
+    "issueDate": "Data de Emissão",
+    "amount": "Valor",
+    "noPending": "Nenhuma conta pendente.",
+    "receivableDescription": "Receitas registradas mas ainda não recebidas",
+    "payableDescription": "Despesas registradas mas ainda não pagas"
   },
   "dre": {
     "title": "DRE",
@@ -248,7 +264,10 @@
       "allDirections": "Todas as direções",
       "allCategories": "Todas as categorias",
       "allAccounts": "Todas as contas",
-      "allPaymentMethods": "Todas as formas de pagamento"
+      "allPaymentMethods": "Todas as formas de pagamento",
+      "allSettled": "Todas as liquidações",
+      "settled": "Liquidado",
+      "notSettled": "Não Liquidado"
     },
     "table": {
       "id": "ID",
@@ -300,7 +319,8 @@
     },
     "actions": {
       "edit": "Editar",
-      "delete": "Deletar"
+      "delete": "Deletar",
+      "settle": "Liquidar"
     },
     "delete": {
       "title": "Confirmar exclusão",
@@ -317,6 +337,15 @@
       "saving": "Salvando...",
       "cancel": "Cancelar",
       "error": "Erro ao atualizar transação"
+    },
+    "settle": {
+      "title": "Liquidar Transação",
+      "description": "Selecione a data em que a transação foi efetivamente liquidada.",
+      "date": "Data de Liquidação",
+      "confirm": "Liquidar",
+      "settling": "Liquidando...",
+      "cancel": "Cancelar",
+      "error": "Erro ao liquidar transação"
     },
     "noResults": "Nenhuma transação encontrada.",
     "pagination": {

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/components/settings-provider";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,10 @@ export function TransactionsTable({
     const [isEditing, setIsEditing] = useState(false);
     const [deleteError, setDeleteError] = useState<string>("");
     const [editError, setEditError] = useState<string>("");
+    const [settleError, setSettleError] = useState<string>("");
+
+    const [settleDialogOpen, setSettleDialogOpen] = useState(false);
+    const [settleDate, setSettleDate] = useState("");
 
     // Edit states
     const [editDescription, setEditDescription] = useState("");
@@ -89,6 +93,7 @@ export function TransactionsTable({
 
     const currentDirectionFilter = searchParams.get("direction") || "";
     const currentCategoryFilter = searchParams.get("categoryId") || "";
+    const currentSettledFilter = searchParams.get("settled") || "";
 
     const formatCurrency = (cents: number) => {
         return new Intl.NumberFormat(locale === 'pt' ? 'pt-BR' : 'en-US', {
@@ -209,6 +214,42 @@ export function TransactionsTable({
         }
     };
 
+    const handleSettleClick = (transaction: ExtendedTransaction) => {
+        setSelectedTransaction(transaction);
+        setSettleDate(new Date().toISOString().split('T')[0]);
+        setSettleError("");
+        setSettleDialogOpen(true);
+    };
+
+    const handleSettle = async () => {
+        if (!selectedTransaction) return;
+        setIsEditing(true);
+        setSettleError("");
+
+        try {
+            const response = await fetch(`/api/transactions/${selectedTransaction.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    settlementDate: new Date(settleDate).toISOString(),
+                }),
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.error || "Error settling transaction");
+            }
+
+            setSettleDialogOpen(false);
+            setSelectedTransaction(null);
+            router.refresh();
+        } catch (error) {
+            setSettleError(error instanceof Error ? error.message : "Error settling transaction");
+        } finally {
+            setIsEditing(false);
+        }
+    };
+
     const getDirectionClass = (direction: string) => {
         return direction === "IN"
             ? "text-green-600 dark:text-green-400 font-medium"
@@ -287,6 +328,25 @@ export function TransactionsTable({
                             ))}
                         </DropdownMenuContent>
                     </DropdownMenu>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="whitespace-nowrap">
+                                {currentSettledFilter === "true" ? t('filter.settled') : currentSettledFilter === "false" ? t('filter.notSettled') : t('filter.allSettled')}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => handleFilterChange("settled", "")}>
+                                {t('filter.allSettled')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleFilterChange("settled", "true")}>
+                                {t('filter.settled')}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleFilterChange("settled", "false")}>
+                                {t('filter.notSettled')}
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
                 <div className="hidden sm:block">
@@ -362,6 +422,17 @@ export function TransactionsTable({
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex gap-2">
+                                            {!transaction.settlementDate && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleSettleClick(transaction)}
+                                                    title={t('actions.settle')}
+                                                    className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                                                >
+                                                    <Check className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
@@ -422,6 +493,16 @@ export function TransactionsTable({
                                 </div>
                                 
                                 <div className="flex gap-1">
+                                    {!transaction.settlementDate && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                                            onClick={() => handleSettleClick(transaction)}
+                                        >
+                                            <Check className="h-3.5 w-3.5" />
+                                        </Button>
+                                    )}
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -669,6 +750,45 @@ export function TransactionsTable({
                         </Button>
                         <Button onClick={handleEdit} disabled={isEditing || !editDescription.trim() || !editAmount || !editCategoryId}>
                             {isEditing ? t('edit.saving') : t('edit.save')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Settle Dialog */}
+            <Dialog open={settleDialogOpen} onOpenChange={setSettleDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('settle.title')}</DialogTitle>
+                        <DialogDescription>
+                            {t('settle.description')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="py-4">
+                        <Field>
+                            <FieldLabel>{t('settle.date')}</FieldLabel>
+                            <Input
+                                type="date"
+                                value={settleDate}
+                                onChange={(e) => setSettleDate(e.target.value)}
+                                disabled={isEditing}
+                            />
+                        </Field>
+                    </div>
+
+                    {settleError && (
+                        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                            {settleError}
+                        </div>
+                    )}
+                    
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setSettleDialogOpen(false)} disabled={isEditing}>
+                            {t('settle.cancel')}
+                        </Button>
+                        <Button onClick={handleSettle} disabled={isEditing || !settleDate}>
+                            {isEditing ? t('settle.settling') : t('settle.confirm')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
