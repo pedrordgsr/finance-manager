@@ -13,7 +13,8 @@ import {
   TrendingUp,
   Wallet,
   ArrowRight,
-  CreditCard
+  CreditCard,
+  Target
 } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { 
@@ -34,8 +35,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency as formatCurrencyUtil, formatDate } from "@/lib/utils"
 import { useSettings } from "@/components/settings-provider"
-import { getDreData } from "./actions"
-import type { Category, Account, PaymentMethod, Transaction } from "@/generated/prisma/client"
+import { getDreData, updateBudget } from "./actions"
+import type { Category, Account, PaymentMethod, Transaction, Budget } from "@/generated/prisma/client"
 
 type TransactionWithRelations = Transaction & {
   category: Category
@@ -49,11 +50,13 @@ interface DREViewProps {
     categories: Category[]
     accounts: Account[]
     paymentMethods: PaymentMethod[]
+    budgets: Budget[]
   }
   currentYear: number
 }
 
 type GroupByOption = "CATEGORY" | "ACCOUNT" | "PAYMENT_METHOD"
+type ViewMode = "ACTUAL" | "BUDGET" | "BOTH"
 
 export function DREView({ initialData, currentYear: initialYear }: DREViewProps) {
   const t = useTranslations("dre")
@@ -66,6 +69,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
   }
   const [year, setYear] = useState(initialYear)
   const [groupBy, setGroupBy] = useState<GroupByOption>("CATEGORY")
+  const [viewMode, setViewMode] = useState<ViewMode>("ACTUAL")
   const [data, setData] = useState(initialData)
   const [isLoading, setIsLoading] = useState(false)
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({})
@@ -104,13 +108,15 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
 
   const groupedData = useMemo(() => {
     const result: {
-      IN: Record<string, { label: string, values: number[], transactions: TransactionWithRelations[][] }>
-      OUT: Record<string, { label: string, values: number[], transactions: TransactionWithRelations[][] }>
+      IN: Record<string, { label: string, values: number[], budgets: number[], transactions: TransactionWithRelations[][] }>
+      OUT: Record<string, { label: string, values: number[], budgets: number[], transactions: TransactionWithRelations[][] }>
       net: number[]
+      netBudgets: number[]
     } = {
       IN: {},
       OUT: {},
-      net: Array(12).fill(0)
+      net: Array(12).fill(0),
+      netBudgets: Array(12).fill(0)
     }
 
     // Initialize dimensions
@@ -119,14 +125,20 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                  data.paymentMethods
 
     dims.forEach(dim => {
-      result.IN[dim.id] = { label: dim.name, values: Array(12).fill(0), transactions: Array.from({ length: 12 }, () => []) }
-      result.OUT[dim.id] = { label: dim.name, values: Array(12).fill(0), transactions: Array.from({ length: 12 }, () => []) }
+      const dimBudgets = Array(12).fill(0)
+      if (groupBy === "CATEGORY") {
+        data.budgets.filter(b => b.categoryId === dim.id).forEach(b => {
+          dimBudgets[b.month] = b.amountCents
+        })
+      }
+      result.IN[dim.id] = { label: dim.name, values: Array(12).fill(0), budgets: dimBudgets, transactions: Array.from({ length: 12 }, () => []) }
+      result.OUT[dim.id] = { label: dim.name, values: Array(12).fill(0), budgets: dimBudgets, transactions: Array.from({ length: 12 }, () => []) }
     })
 
     // Catch-all for deleted or null relations
     const otherLabel = t("other")
-    result.IN["other"] = { label: otherLabel, values: Array(12).fill(0), transactions: Array.from({ length: 12 }, () => []) }
-    result.OUT["other"] = { label: otherLabel, values: Array(12).fill(0), transactions: Array.from({ length: 12 }, () => []) }
+    result.IN["other"] = { label: otherLabel, values: Array(12).fill(0), budgets: Array(12).fill(0), transactions: Array.from({ length: 12 }, () => []) }
+    result.OUT["other"] = { label: otherLabel, values: Array(12).fill(0), budgets: Array(12).fill(0), transactions: Array.from({ length: 12 }, () => []) }
 
     data.transactions.forEach(tx => {
       const date = new Date(tx.issueDate)
@@ -160,23 +172,38 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
       )
     }
 
+    // Calculate net budgets
+    if (groupBy === "CATEGORY") {
+      Object.entries(result.IN).forEach(([_, row]) => {
+        row.budgets.forEach((v, i) => result.netBudgets[i] += v)
+      })
+      Object.entries(result.OUT).forEach(([_, row]) => {
+        row.budgets.forEach((v, i) => result.netBudgets[i] -= v)
+      })
+    }
+
     return {
       IN: filterEmpty(result.IN),
       OUT: filterEmpty(result.OUT),
-      net: result.net
+      net: result.net,
+      netBudgets: result.netBudgets
     }
   }, [data, groupBy, t])
 
   const totals = useMemo(() => {
     const result = {
       IN: Array(12).fill(0),
-      OUT: Array(12).fill(0)
+      OUT: Array(12).fill(0),
+      budgetIN: Array(12).fill(0),
+      budgetOUT: Array(12).fill(0)
     }
     Object.values(groupedData.IN).forEach(row => {
       row.values.forEach((v: number, i: number) => result.IN[i] += v)
+      row.budgets.forEach((v: number, i: number) => result.budgetIN[i] += v)
     })
     Object.values(groupedData.OUT).forEach(row => {
       row.values.forEach((v: number, i: number) => result.OUT[i] += v)
+      row.budgets.forEach((v: number, i: number) => result.budgetOUT[i] += v)
     })
     return result
   }, [groupedData])
@@ -231,21 +258,40 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          {/* View Mode Select (Desktop only) */}
+          {!isMobile && (
+            <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg">
+              {(["ACTUAL", "BUDGET", "BOTH"] as ViewMode[]).map((v) => (
+                <Button
+                  key={v}
+                  variant={viewMode === v ? "default" : "ghost"}
+                  size="sm"
+                  className="h-8 px-3 text-xs"
+                  onClick={() => setViewMode(v)}
+                >
+                  {t(`views.${v}`)}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {isMobile ? (
-        <DREMobile 
-          months={months}
-          groupedData={groupedData}
-          totals={totals}
-          formatCurrency={formatCurrency}
-          formatDate={formatDate}
-          locale={locale}
-          expandedRows={expandedRows}
-          toggleRow={toggleRow}
-          t={t}
-        />
+          <DREMobile 
+            months={months}
+            groupedData={groupedData}
+            totals={totals}
+            formatCurrency={formatCurrency}
+            formatDate={formatDate}
+            locale={locale}
+            expandedRows={expandedRows}
+            toggleRow={toggleRow}
+            t={t}
+            year={year}
+            setData={setData}
+          />
       ) : (
         <div className="flex-1 overflow-auto rounded-md border bg-card">
           <Table>
@@ -253,9 +299,36 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
               <TableRow className="hover:bg-transparent">
                 <TableHead className="sticky left-0 bg-card z-10 w-[200px] min-w-[200px]">{t("category")}</TableHead>
                 {months.map((month, i) => (
-                  <TableHead key={i} className="text-right min-w-[120px]">{month}</TableHead>
+                  <TableHead 
+                    key={i} 
+                    className="text-right min-w-[120px]" 
+                    colSpan={viewMode === "BOTH" ? 2 : 1}
+                  >
+                    <div className="flex flex-col items-end">
+                      <span>{month}</span>
+                      {viewMode === "BOTH" && (
+                        <div className="flex gap-4 text-[10px] font-normal text-muted-foreground mt-1">
+                          <span>{t("views.ACTUAL")}</span>
+                          <span>{t("views.BUDGET")}</span>
+                        </div>
+                      )}
+                    </div>
+                  </TableHead>
                 ))}
-                <TableHead className="text-right font-bold bg-muted/30 min-w-[140px]">{t("total")}</TableHead>
+                <TableHead 
+                  className="text-right font-bold bg-muted/30 min-w-[140px]"
+                  colSpan={viewMode === "BOTH" ? 2 : 1}
+                >
+                  <div className="flex flex-col items-end">
+                    <span>{t("total")}</span>
+                    {viewMode === "BOTH" && (
+                      <div className="flex gap-4 text-[10px] font-normal text-muted-foreground mt-1">
+                        <span>{t("views.ACTUAL")}</span>
+                        <span>{t("views.BUDGET")}</span>
+                      </div>
+                    )}
+                  </div>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -266,36 +339,92 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                   {t("income")}
                 </TableCell>
                 {months.map((_, i) => (
-                  <TableCell key={i} className="text-right text-green-600 dark:text-green-400">
-                    {formatCurrency(totals.IN[i], locale)}
-                  </TableCell>
+                  <Fragment key={i}>
+                    {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                      <TableCell className="text-right text-green-600 dark:text-green-400">
+                        {formatCurrency(totals.IN[i], locale)}
+                      </TableCell>
+                    )}
+                    {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                      <TableCell className="text-right text-muted-foreground italic font-normal">
+                        {formatCurrency(totals.budgetIN[i], locale)}
+                      </TableCell>
+                    )}
+                  </Fragment>
                 ))}
-                <TableCell className="text-right bg-muted/30 text-green-600 dark:text-green-400">
-                  {formatCurrency(totals.IN.reduce((a, b) => a + b, 0), locale)}
-                </TableCell>
+                <Fragment>
+                  {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                    <TableCell className="text-right bg-muted/30 text-green-600 dark:text-green-400">
+                      {formatCurrency(totals.IN.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  )}
+                  {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                    <TableCell className="text-right bg-muted/30 text-muted-foreground italic font-normal text-sm">
+                      {formatCurrency(totals.budgetIN.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  )}
+                </Fragment>
               </TableRow>
 
               {expandedRows["income-section"] && Object.entries(groupedData.IN).map(([id, row]) => (
                 <Fragment key={id}>
                   <TableRow key={id} className="hover:bg-muted/30 cursor-pointer" onClick={() => toggleRow(`IN-${id}`)}>
-                    <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2">
+                    <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2 group">
                       {expandedRows[`IN-${id}`] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                      {row.label}
+                      <span className="flex-1 truncate">{row.label}</span>
+                      {groupBy === "CATEGORY" && id !== "other" && (
+                        <BudgetDialog 
+                          categoryId={parseInt(id)}
+                          categoryName={row.label}
+                          year={year}
+                          initialBudgets={row.budgets}
+                          onSave={async (newBudgets: number[]) => {
+                            await Promise.all(newBudgets.map((val: number, idx: number) => updateBudget(parseInt(id), idx, year, val)))
+                            const newData = await getDreData(year)
+                            setData(newData)
+                          }}
+                          formatCurrency={formatCurrency}
+                          locale={locale}
+                          t={t}
+                        />
+                      )}
                     </TableCell>
                     {row.values.map((val: number, i: number) => (
-                      <TableCell key={i} className="text-right text-sm">
-                        {val > 0 ? formatCurrency(val, locale) : "-"}
-                      </TableCell>
+                      <Fragment key={i}>
+                        {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                          <TableCell className="text-right text-sm">
+                            {val > 0 ? formatCurrency(val, locale) : "-"}
+                          </TableCell>
+                        )}
+                        {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                          <TableCell className="text-right text-sm text-muted-foreground italic">
+                            {row.budgets[i] > 0 ? formatCurrency(row.budgets[i], locale) : "-"}
+                          </TableCell>
+                        )}
+                      </Fragment>
                     ))}
-                    <TableCell className="text-right bg-muted/20 text-sm font-medium">
-                      {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
-                    </TableCell>
+                    <Fragment>
+                      {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                        <TableCell className="text-right bg-muted/20 text-sm font-medium">
+                          {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
+                        </TableCell>
+                      )}
+                      {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                        <TableCell className="text-right bg-muted/20 text-sm text-muted-foreground italic">
+                          {formatCurrency(row.budgets.reduce((a: number, b: number) => a + b, 0), locale)}
+                        </TableCell>
+                      )}
+                    </Fragment>
                   </TableRow>
                   {expandedRows[`IN-${id}`] && (
                     <TableRow className="bg-muted/5 hover:bg-muted/5">
                       <TableCell className="sticky left-0 bg-card z-10 border-b-0" />
                       {row.transactions.map((monthTxs: TransactionWithRelations[], i: number) => (
-                        <TableCell key={i} className="align-top p-1 border-x border-muted/20">
+                        <TableCell 
+                          key={i} 
+                          className="align-top p-1 border-x border-muted/20"
+                          colSpan={viewMode === "BOTH" ? 2 : 1}
+                        >
                           <MonthTransactionList 
                             transactions={monthTxs}
                             locale={locale}
@@ -305,7 +434,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                           />
                         </TableCell>
                       ))}
-                      <TableCell className="bg-muted/30 border-l border-muted/20" />
+                      <TableCell className="bg-muted/30 border-l border-muted/20" colSpan={viewMode === "BOTH" ? 2 : 1} />
                     </TableRow>
                   )}
                 </Fragment>
@@ -318,36 +447,92 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                   {t("expense")}
                 </TableCell>
                 {months.map((_, i) => (
-                  <TableCell key={i} className="text-right text-red-600 dark:text-red-400">
-                    {formatCurrency(totals.OUT[i], locale)}
-                  </TableCell>
+                  <Fragment key={i}>
+                    {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                      <TableCell className="text-right text-red-600 dark:text-red-400">
+                        {formatCurrency(totals.OUT[i], locale)}
+                      </TableCell>
+                    )}
+                    {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                      <TableCell className="text-right text-muted-foreground italic font-normal">
+                        {formatCurrency(totals.budgetOUT[i], locale)}
+                      </TableCell>
+                    )}
+                  </Fragment>
                 ))}
-                <TableCell className="text-right bg-muted/30 text-red-600 dark:text-red-400">
-                  {formatCurrency(totals.OUT.reduce((a, b) => a + b, 0), locale)}
-                </TableCell>
+                <Fragment>
+                  {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                    <TableCell className="text-right bg-muted/30 text-red-600 dark:text-red-400">
+                      {formatCurrency(totals.OUT.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  )}
+                  {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                    <TableCell className="text-right bg-muted/30 text-muted-foreground italic font-normal text-sm">
+                      {formatCurrency(totals.budgetOUT.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  )}
+                </Fragment>
               </TableRow>
 
               {expandedRows["expense-section"] && Object.entries(groupedData.OUT).map(([id, row]) => (
                 <Fragment key={id}>
                   <TableRow key={id} className="hover:bg-muted/30 cursor-pointer" onClick={() => toggleRow(`OUT-${id}`)}>
-                    <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2">
+                    <TableCell className="sticky left-0 bg-card z-10 pl-8 flex items-center gap-2 group">
                       {expandedRows[`OUT-${id}`] ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                      {row.label}
+                      <span className="flex-1 truncate">{row.label}</span>
+                      {groupBy === "CATEGORY" && id !== "other" && (
+                        <BudgetDialog 
+                          categoryId={parseInt(id)}
+                          categoryName={row.label}
+                          year={year}
+                          initialBudgets={row.budgets}
+                          onSave={async (newBudgets: number[]) => {
+                            await Promise.all(newBudgets.map((val: number, idx: number) => updateBudget(parseInt(id), idx, year, val)))
+                            const newData = await getDreData(year)
+                            setData(newData)
+                          }}
+                          formatCurrency={formatCurrency}
+                          locale={locale}
+                          t={t}
+                        />
+                      )}
                     </TableCell>
                     {row.values.map((val: number, i: number) => (
-                      <TableCell key={i} className="text-right text-sm">
-                        {val > 0 ? formatCurrency(val, locale) : "-"}
-                      </TableCell>
+                      <Fragment key={i}>
+                        {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                          <TableCell className="text-right text-sm">
+                            {val > 0 ? formatCurrency(val, locale) : "-"}
+                          </TableCell>
+                        )}
+                        {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                          <TableCell className="text-right text-sm text-muted-foreground italic">
+                            {row.budgets[i] > 0 ? formatCurrency(row.budgets[i], locale) : "-"}
+                          </TableCell>
+                        )}
+                      </Fragment>
                     ))}
-                    <TableCell className="text-right bg-muted/20 text-sm font-medium">
-                      {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
-                    </TableCell>
+                    <Fragment>
+                      {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                        <TableCell className="text-right bg-muted/20 text-sm font-medium">
+                          {formatCurrency(row.values.reduce((a: number, b: number) => a + b, 0), locale)}
+                        </TableCell>
+                      )}
+                      {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                        <TableCell className="text-right bg-muted/20 text-sm text-muted-foreground italic">
+                          {formatCurrency(row.budgets.reduce((a: number, b: number) => a + b, 0), locale)}
+                        </TableCell>
+                      )}
+                    </Fragment>
                   </TableRow>
                   {expandedRows[`OUT-${id}`] && (
                     <TableRow className="bg-muted/5 hover:bg-muted/5">
                       <TableCell className="sticky left-0 bg-card z-10 border-b-0" />
                       {row.transactions.map((monthTxs: TransactionWithRelations[], i: number) => (
-                        <TableCell key={i} className="align-top p-1 border-x border-muted/20">
+                        <TableCell 
+                          key={i} 
+                          className="align-top p-1 border-x border-muted/20"
+                          colSpan={viewMode === "BOTH" ? 2 : 1}
+                        >
                           <MonthTransactionList 
                             transactions={monthTxs}
                             locale={locale}
@@ -357,7 +542,7 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
                           />
                         </TableCell>
                       ))}
-                      <TableCell className="bg-muted/30 border-l border-muted/20" />
+                      <TableCell className="bg-muted/30 border-l border-muted/20" colSpan={viewMode === "BOTH" ? 2 : 1} />
                     </TableRow>
                   )}
                 </Fragment>
@@ -367,13 +552,31 @@ export function DREView({ initialData, currentYear: initialYear }: DREViewProps)
               <TableRow className="bg-muted font-bold hover:bg-muted border-t-2">
                 <TableCell className="sticky left-0 bg-inherit z-10 py-4">{t("netProfit")}</TableCell>
                 {months.map((_, i) => (
-                  <TableCell key={i} className={`text-right ${groupedData.net[i] >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                    {formatCurrency(groupedData.net[i], locale)}
-                  </TableCell>
+                  <Fragment key={i}>
+                    {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                      <TableCell className={`text-right ${groupedData.net[i] >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                        {formatCurrency(groupedData.net[i], locale)}
+                      </TableCell>
+                    )}
+                    {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                      <TableCell className={`text-right text-muted-foreground italic font-normal ${groupedData.netBudgets[i] >= 0 ? "text-green-600/70" : "text-red-600/70"}`}>
+                        {formatCurrency(groupedData.netBudgets[i], locale)}
+                      </TableCell>
+                    )}
+                  </Fragment>
                 ))}
-                <TableCell className={`text-right bg-muted/30 ${groupedData.net.reduce((a, b) => a + b, 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
-                  {formatCurrency(groupedData.net.reduce((a, b) => a + b, 0), locale)}
-                </TableCell>
+                <Fragment>
+                  {(viewMode === "ACTUAL" || viewMode === "BOTH") && (
+                    <TableCell className={`text-right bg-muted/30 ${groupedData.net.reduce((a: number, b: number) => a + b, 0) >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+                      {formatCurrency(groupedData.net.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  )}
+                  {(viewMode === "BUDGET" || viewMode === "BOTH") && (
+                    <TableCell className={`text-right bg-muted/30 text-muted-foreground italic font-normal text-sm ${groupedData.netBudgets.reduce((a: number, b: number) => a + b, 0) >= 0 ? "text-green-600/70" : "text-red-600/70"}`}>
+                      {formatCurrency(groupedData.netBudgets.reduce((a: number, b: number) => a + b, 0), locale)}
+                    </TableCell>
+                  )}
+                </Fragment>
               </TableRow>
             </TableBody>
           </Table>
@@ -444,6 +647,8 @@ interface DREMobileProps {
   expandedRows: Record<string, boolean>
   toggleRow: (id: string) => void
   t: any
+  year: number
+  setData: (data: any) => void
 }
 
 function DREMobile({ 
@@ -455,7 +660,9 @@ function DREMobile({
   locale, 
   expandedRows, 
   toggleRow, 
-  t 
+  t,
+  year,
+  setData
 }: DREMobileProps) {
   const currentMonthIdx = new Date().getMonth()
   const [selectedMonth, setSelectedMonth] = useState(currentMonthIdx)
@@ -522,6 +729,11 @@ function DREMobile({
                   <p className={`text-lg font-bold ${groupedData.net[selectedMonth] >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
                     {formatCurrency(groupedData.net[selectedMonth], locale)}
                   </p>
+                  {groupedData.netBudgets[selectedMonth] !== 0 && (
+                    <p className="text-[10px] text-muted-foreground italic">
+                      {t("budgetShort")}: {formatCurrency(groupedData.netBudgets[selectedMonth], locale)}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -540,18 +752,36 @@ function DREMobile({
                 ) : (
                   incomeRows.map(([id, row]: [string, any]) => (
                     <div key={id} className="rounded-lg border bg-card overflow-hidden">
-                      <button 
-                        className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                      <div 
+                        className="w-full p-3 flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
                         onClick={() => toggleRow(`mobile-IN-${id}`)}
                       >
                         <div className="flex items-center gap-2">
                           {expandedRows[`mobile-IN-${id}`] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                           <span className="text-sm font-medium">{row.label}</span>
+                          {id !== "other" && (
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <BudgetDialog 
+                                categoryId={parseInt(id)}
+                                categoryName={row.label}
+                                year={year}
+                                initialBudgets={row.budgets}
+                                onSave={async (newBudgets: number[]) => {
+                                  await Promise.all(newBudgets.map((val: number, idx: number) => updateBudget(parseInt(id), idx, year, val)))
+                                  const newData = await getDreData(year)
+                                  setData(newData)
+                                }}
+                                formatCurrency={formatCurrency}
+                                locale={locale}
+                                t={t}
+                              />
+                            </div>
+                          )}
                         </div>
                         <span className="text-sm font-bold text-green-600">
                           {formatCurrency(row.values[selectedMonth], locale)}
                         </span>
-                      </button>
+                      </div>
                       
                       {expandedRows[`mobile-IN-${id}`] && (
                         <div className="border-t bg-muted/20 p-2 space-y-2">
@@ -587,18 +817,36 @@ function DREMobile({
                 ) : (
                   expenseRows.map(([id, row]: [string, any]) => (
                     <div key={id} className="rounded-lg border bg-card overflow-hidden">
-                      <button 
-                        className="w-full p-3 flex items-center justify-between text-left hover:bg-muted/30 transition-colors"
+                      <div 
+                        className="w-full p-3 flex items-center justify-between cursor-pointer hover:bg-muted/30 transition-colors"
                         onClick={() => toggleRow(`mobile-OUT-${id}`)}
                       >
                         <div className="flex items-center gap-2">
                           {expandedRows[`mobile-OUT-${id}`] ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                           <span className="text-sm font-medium">{row.label}</span>
+                          {id !== "other" && (
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <BudgetDialog 
+                                categoryId={parseInt(id)}
+                                categoryName={row.label}
+                                year={year}
+                                initialBudgets={row.budgets}
+                                onSave={async (newBudgets: number[]) => {
+                                  await Promise.all(newBudgets.map((val: number, idx: number) => updateBudget(parseInt(id), idx, year, val)))
+                                  const newData = await getDreData(year)
+                                  setData(newData)
+                                }}
+                                formatCurrency={formatCurrency}
+                                locale={locale}
+                                t={t}
+                              />
+                            </div>
+                          )}
                         </div>
                         <span className="text-sm font-bold text-red-600">
                           {formatCurrency(row.values[selectedMonth], locale)}
                         </span>
-                      </button>
+                      </div>
                       
                       {expandedRows[`mobile-OUT-${id}`] && (
                         <div className="border-t bg-muted/20 p-2 space-y-2">
@@ -626,5 +874,97 @@ function DREMobile({
         </div>
       </div>
     </div>
+  )
+}
+
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+function BudgetDialog({ 
+  categoryId, 
+  categoryName, 
+  year, 
+  initialBudgets, 
+  onSave,
+  formatCurrency,
+  locale,
+  t
+}: { 
+  categoryId: number, 
+  categoryName: string, 
+  year: number, 
+  initialBudgets: number[], 
+  onSave: (budgets: number[]) => Promise<void>,
+  formatCurrency: (cents: number, loc: string) => string,
+  locale: string,
+  t: any
+}) {
+  const [budgets, setBudgets] = useState<string[]>(initialBudgets.map(v => (v / 100).toString()))
+  const [isOpen, setIsOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const numericBudgets = budgets.map(v => Math.round(parseFloat(v || "0") * 100))
+      await onSave(numericBudgets)
+      setIsOpen(false)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Target className="h-3 w-3" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("budgetFor", { name: categoryName, year })}</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-4 py-4 max-h-[60vh] overflow-y-auto">
+          {Array.from({ length: 12 }).map((_, i) => {
+            const date = new Date(year, i, 1)
+            const monthName = new Intl.DateTimeFormat(locale, { month: "long" }).format(date)
+            return (
+              <div key={i} className="flex flex-col gap-1.5">
+                <Label htmlFor={`month-${i}`} className="capitalize">{monthName}</Label>
+                <Input 
+                  id={`month-${i}`}
+                  type="number"
+                  step="0.01"
+                  value={budgets[i]}
+                  onChange={(e) => {
+                    const newBudgets = [...budgets]
+                    newBudgets[i] = e.target.value
+                    setBudgets(newBudgets)
+                  }}
+                  disabled={isSaving}
+                />
+              </div>
+            )
+          })}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isSaving}>
+            {t("cancel")}
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? t("saving") : t("save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

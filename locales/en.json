@@ -40,12 +40,23 @@
     "netProfit": "Net Profit",
     "other": "Other",
     "noTransactions": "No transactions",
+    "budgetShort": "Budg.",
+    "budgetFor": "Budget for {name} in {year}",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
     "groupBy": "Group by",
     "year": "Year",
     "groupOptions": {
       "CATEGORY": "Category",
       "ACCOUNT": "Account",
       "PAYMENT_METHOD": "Payment Method"
+    },
+    "viewMode": "View Mode",
+    "views": {
+      "ACTUAL": "Actual",
+      "BUDGET": "Budget",
+      "BOTH": "Comparison"
     }
   },
   "categories": {

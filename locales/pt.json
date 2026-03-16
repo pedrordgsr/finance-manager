@@ -40,12 +40,23 @@
     "netProfit": "Resultado Líquido",
     "other": "Outros",
     "noTransactions": "Nenhuma transação",
+    "budgetShort": "Orç.",
+    "budgetFor": "Orçamento para {name} em {year}",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "cancel": "Cancelar",
     "groupBy": "Agrupar por",
     "year": "Ano",
     "groupOptions": {
       "CATEGORY": "Categoria",
       "ACCOUNT": "Conta",
       "PAYMENT_METHOD": "Forma de Pagamento"
+    },
+    "viewMode": "Modo de Exibição",
+    "views": {
+      "ACTUAL": "Realizado",
+      "BUDGET": "Orçado",
+      "BOTH": "Comparativo"
     }
   },
   "categories": {

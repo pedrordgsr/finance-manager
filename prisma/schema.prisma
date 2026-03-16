@@ -32,6 +32,7 @@ model Category {
   createdAt DateTime     @default(now())
 
   transactions Transaction[]
+  budgets      Budget[]
 }
 
 model PaymentMethod {
@@ -79,4 +80,18 @@ model Transaction {
   @@index([settlementDate])
   @@index([categoryId])
   @@index([direction])
+}
+
+model Budget {
+  id          Int      @id @default(autoincrement())
+  amountCents Int
+  month       Int      // 0-11
+  year        Int
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([categoryId, month, year])
 }
