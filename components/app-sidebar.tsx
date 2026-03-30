@@ -16,6 +16,8 @@ import {
 import { ModeToggle } from "@/components/ui/theme-toggle"
 import { Home, Receipt, FolderOpen, CreditCard, Wallet, BarChart3, Settings as SettingsIcon } from "lucide-react"
 import { useTranslations } from 'next-intl'
+import { signOut } from "next-auth/react"
+import { Button } from "@/components/ui/button"
 
 export function AppSidebar() {
   const t = useTranslations('sidebar')
@@ -131,7 +133,14 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <div className="p-4 flex gap-2">
+        <div className="p-4 flex flex-col gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+          >
+            Logout
+          </Button>
           <ModeToggle />
         </div>
       </SidebarFooter>

@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { getCurrentUserId } from "@/lib/auth-session"
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const userId = await getCurrentUserId()
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { id } = await params
+    const categoryId = parseInt(id)
     const body = await request.json()
     const { name, kind } = body
 
@@ -17,9 +24,20 @@ export async function PATCH(
       )
     }
 
-    const category = await prisma.category.update({
-      where: { id: parseInt(id) },
+    const updated = await prisma.category.updateMany({
+      where: { id: categoryId, userId },
       data: { name, kind },
+    })
+
+    if (updated.count === 0) {
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 404 }
+      )
+    }
+
+    const category = await prisma.category.findFirst({
+      where: { id: categoryId, userId },
     })
 
     return NextResponse.json(category)
@@ -45,11 +63,24 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    const userId = await getCurrentUserId()
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
-    await prisma.category.delete({
-      where: { id: parseInt(id) },
+    const { id } = await params
+    const categoryId = parseInt(id)
+
+    const deleted = await prisma.category.deleteMany({
+      where: { id: categoryId, userId },
     })
+
+    if (deleted.count === 0) {
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 404 }
+      )
+    }
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

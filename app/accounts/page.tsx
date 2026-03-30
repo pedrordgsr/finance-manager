@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { AccountsTable } from "@/components/accounts-table";
 import { getTranslations } from 'next-intl/server';
+import { requireUserId } from "@/lib/auth-session";
 
 interface AccountsPageProps {
     searchParams: Promise<{
@@ -12,13 +13,14 @@ interface AccountsPageProps {
 
 export default async function AccountsPage({ searchParams }: AccountsPageProps) {
     const t = await getTranslations('accounts');
+    const userId = await requireUserId();
     const params = await searchParams;
     const currentPage = parseInt(params.page || "1");
     const searchQuery = params.search || "";
     const typeFilter = params.type || "";
     const itemsPerPage = 10;
 
-    const where: any = {};
+    const where: any = { userId };
 
     if (searchQuery) {
         where.name = {

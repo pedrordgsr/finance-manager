@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { Direction } from "@prisma/client"
+import { getCurrentUserId } from "@/lib/auth-session"
 
 export async function GET(request: Request) {
+    const userId = await getCurrentUserId()
+    if (!userId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get("page") || "1")
     const limit = parseInt(searchParams.get("limit") || "10")
@@ -12,7 +18,7 @@ export async function GET(request: Request) {
     const accountId = searchParams.get("accountId")
     const paymentMethodId = searchParams.get("paymentMethodId")
 
-    const where: any = {}
+    const where: any = { userId }
 
     if (search) {
         where.description = { contains: search }
@@ -65,6 +71,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
+        const userId = await getCurrentUserId()
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const body = await request.json()
         const {
             description,
@@ -85,6 +96,41 @@ export async function POST(request: Request) {
             )
         }
 
+        const normalizedCategoryId = parseInt(categoryId.toString())
+        const normalizedAccountId = accountId ? parseInt(accountId.toString()) : null
+        const normalizedPaymentMethodId = paymentMethodId ? parseInt(paymentMethodId.toString()) : null
+
+        const category = await prisma.category.findFirst({
+            where: { id: normalizedCategoryId, userId },
+            select: { id: true },
+        })
+
+        if (!category) {
+            return NextResponse.json({ error: "Invalid category" }, { status: 400 })
+        }
+
+        if (normalizedAccountId) {
+            const account = await prisma.account.findFirst({
+                where: { id: normalizedAccountId, userId },
+                select: { id: true },
+            })
+
+            if (!account) {
+                return NextResponse.json({ error: "Invalid account" }, { status: 400 })
+            }
+        }
+
+        if (normalizedPaymentMethodId) {
+            const paymentMethod = await prisma.paymentMethod.findFirst({
+                where: { id: normalizedPaymentMethodId, userId },
+                select: { id: true },
+            })
+
+            if (!paymentMethod) {
+                return NextResponse.json({ error: "Invalid payment method" }, { status: 400 })
+            }
+        }
+
         const transaction = await prisma.transaction.create({
             data: {
                 description,
@@ -92,10 +138,11 @@ export async function POST(request: Request) {
                 direction,
                 issueDate: new Date(issueDate),
                 settlementDate: settlementDate ? new Date(settlementDate) : null,
-                categoryId: parseInt(categoryId.toString()),
-                accountId: accountId ? parseInt(accountId.toString()) : null,
-                paymentMethodId: paymentMethodId ? parseInt(paymentMethodId.toString()) : null,
+                categoryId: normalizedCategoryId,
+                accountId: normalizedAccountId,
+                paymentMethodId: normalizedPaymentMethodId,
                 notes,
+                userId,
             },
             include: {
                 category: true,

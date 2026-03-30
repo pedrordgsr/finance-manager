@@ -1,8 +1,10 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
+import { requireUserId } from "@/lib/auth-session"
 
 export async function getDreData(year: number, accountingMode: "ACCRUAL" | "CASH" = "ACCRUAL") {
+  const userId = await requireUserId()
   const startDate = new Date(year, 0, 1)
   const endDate = new Date(year, 11, 31, 23, 59, 59, 999)
 
@@ -12,7 +14,10 @@ export async function getDreData(year: number, accountingMode: "ACCRUAL" | "CASH
 
   const [transactions, categories, accounts, paymentMethods, budgets] = await Promise.all([
     prisma.transaction.findMany({
-      where: dateFilter,
+      where: {
+        ...dateFilter,
+        userId,
+      },
       include: {
         category: true,
         account: true,
@@ -22,11 +27,12 @@ export async function getDreData(year: number, accountingMode: "ACCRUAL" | "CASH
         issueDate: "asc",
       },
     }),
-    prisma.category.findMany(),
-    prisma.account.findMany(),
-    prisma.paymentMethod.findMany(),
+    prisma.category.findMany({ where: { userId } }),
+    prisma.account.findMany({ where: { userId } }),
+    prisma.paymentMethod.findMany({ where: { userId } }),
     prisma.budget.findMany({
       where: {
+        userId,
         year,
       }
     })
@@ -42,9 +48,21 @@ export async function getDreData(year: number, accountingMode: "ACCRUAL" | "CASH
 }
 
 export async function updateBudget(categoryId: number, month: number, year: number, amountCents: number) {
+  const userId = await requireUserId()
+
+  const category = await prisma.category.findFirst({
+    where: { id: categoryId, userId },
+    select: { id: true },
+  })
+
+  if (!category) {
+    throw new Error("Invalid category")
+  }
+
   return await prisma.budget.upsert({
     where: {
-      categoryId_month_year: {
+      userId_categoryId_month_year: {
+        userId,
         categoryId,
         month,
         year,
@@ -54,6 +72,7 @@ export async function updateBudget(categoryId: number, month: number, year: numb
       amountCents,
     },
     create: {
+      userId,
       categoryId,
       month,
       year,

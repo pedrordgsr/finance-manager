@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PaymentMethodsTable } from "@/components/payment-methods-table";
 import { getTranslations } from 'next-intl/server';
+import { requireUserId } from "@/lib/auth-session";
 
 interface PaymentMethodsPageProps {
     searchParams: Promise<{
@@ -11,12 +12,13 @@ interface PaymentMethodsPageProps {
 
 export default async function PaymentMethodsPage({ searchParams }: PaymentMethodsPageProps) {
     const t = await getTranslations('paymentMethods');
+    const userId = await requireUserId();
     const params = await searchParams;
     const currentPage = parseInt(params.page || "1");
     const searchQuery = params.search || "";
     const itemsPerPage = 10;
 
-    const where: any = {};
+    const where: any = { userId };
 
     if (searchQuery) {
         where.name = {

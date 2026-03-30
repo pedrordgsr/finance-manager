@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { getCurrentUserId } from "@/lib/auth-session"
 
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const userId = await getCurrentUserId()
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const { id } = await params
+        const accountId = parseInt(id)
         const body = await request.json()
         const { name, type } = body
 
@@ -17,9 +24,20 @@ export async function PATCH(
             )
         }
 
-        const account = await prisma.account.update({
-            where: { id: parseInt(id) },
+        const updated = await prisma.account.updateMany({
+            where: { id: accountId, userId },
             data: { name, type },
+        })
+
+        if (updated.count === 0) {
+            return NextResponse.json(
+                { error: "Account not found" },
+                { status: 404 }
+            )
+        }
+
+        const account = await prisma.account.findFirst({
+            where: { id: accountId, userId },
         })
 
         return NextResponse.json(account)
@@ -45,11 +63,24 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params
+        const userId = await getCurrentUserId()
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
 
-        await prisma.account.delete({
-            where: { id: parseInt(id) },
+        const { id } = await params
+        const accountId = parseInt(id)
+
+        const deleted = await prisma.account.deleteMany({
+            where: { id: accountId, userId },
         })
+
+        if (deleted.count === 0) {
+            return NextResponse.json(
+                { error: "Account not found" },
+                { status: 404 }
+            )
+        }
 
         return NextResponse.json({ success: true })
     } catch (error: any) {

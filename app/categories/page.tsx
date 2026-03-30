@@ -3,6 +3,7 @@ import { CategoriesTable } from "@/components/categories-table";
 import { CategoryForm } from "@/components/category-form";
 import {getTranslations} from 'next-intl/server';
 import { Button } from "@/components/ui/button";
+import { requireUserId } from "@/lib/auth-session";
 import {
   Dialog,
   DialogContent,
@@ -22,13 +23,14 @@ interface CategoriesPageProps {
 
 export default async function CategoriesPage({ searchParams }: CategoriesPageProps) {
   const t = await getTranslations('categories');
+  const userId = await requireUserId();
   const params = await searchParams;
   const currentPage = parseInt(params.page || "1");
   const searchQuery = params.search || "";
   const kindFilter = params.kind || "";
   const itemsPerPage = 10;
 
-  const where: any = {};
+  const where: any = { userId };
   
   if (searchQuery) {
     where.name = {

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { TransactionsTable } from "@/components/transactions-table"
 import { getTranslations } from "next-intl/server"
+import { requireUserId } from "@/lib/auth-session"
 
 interface TransactionsPageProps {
     searchParams: Promise<{
@@ -16,6 +17,7 @@ interface TransactionsPageProps {
 
 export default async function TransactionsPage({ searchParams }: TransactionsPageProps) {
     const t = await getTranslations("transactions")
+    const userId = await requireUserId()
     const params = await searchParams
 
     const currentPage = parseInt(params.page || "1")
@@ -27,7 +29,7 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
     const paymentMethodId = params.paymentMethodId || ""
     const settled = params.settled || ""
 
-    const where: any = {}
+    const where: any = { userId }
 
     if (searchQuery) {
         where.description = { contains: searchQuery }
@@ -77,9 +79,9 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
             }
         }),
         prisma.transaction.count({ where }),
-        prisma.category.findMany({ orderBy: { name: "asc" } }),
-        prisma.account.findMany({ orderBy: { name: "asc" } }),
-        prisma.paymentMethod.findMany({ orderBy: { name: "asc" } }),
+        prisma.category.findMany({ where: { userId }, orderBy: { name: "asc" } }),
+        prisma.account.findMany({ where: { userId }, orderBy: { name: "asc" } }),
+        prisma.paymentMethod.findMany({ where: { userId }, orderBy: { name: "asc" } }),
     ])
 
     const totalPages = Math.ceil(totalCount / itemsPerPage)

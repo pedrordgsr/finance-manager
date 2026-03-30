@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getCurrentUserId } from "@/lib/auth-session";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -8,6 +9,11 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
   try {
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { messages } = await req.json();
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -16,6 +22,7 @@ export async function POST(req: Request) {
 
     // Fetch recent transactions for context
     const transactions = await prisma.transaction.findMany({
+      where: { userId },
       take: 20,
       orderBy: { issueDate: "desc" },
       include: {

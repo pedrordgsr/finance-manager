@@ -25,31 +25,61 @@ enum AccountType {
   INVESTMENT
 }
 
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  categories     Category[]
+  paymentMethods PaymentMethod[]
+  accounts       Account[]
+  transactions   Transaction[]
+  budgets        Budget[]
+}
+
 model Category {
   id        Int          @id @default(autoincrement())
-  name      String       @unique
+  name      String
   kind      CategoryKind @default(BOTH)
   createdAt DateTime     @default(now())
+  userId    Int
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   transactions Transaction[]
   budgets      Budget[]
+
+  @@unique([userId, name])
+  @@index([userId])
 }
 
 model PaymentMethod {
   id        Int      @id @default(autoincrement())
-  name      String   @unique
+  name      String
   createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   transactions Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
 }
 
 model Account {
   id        Int         @id @default(autoincrement())
-  name      String      @unique
+  name      String
   type      AccountType @default(BANK)
   createdAt DateTime    @default(now())
+  userId    Int
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   transactions Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
 }
 
 model Transaction {
@@ -73,6 +103,9 @@ model Transaction {
   accountId      Int?
   account        Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
 
+  userId         Int
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -80,6 +113,7 @@ model Transaction {
   @@index([settlementDate])
   @@index([categoryId])
   @@index([direction])
+  @@index([userId])
 }
 
 model Budget {
@@ -89,9 +123,12 @@ model Budget {
   year        Int
   categoryId  Int
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([categoryId, month, year])
+  @@unique([userId, categoryId, month, year])
+  @@index([userId])
 }

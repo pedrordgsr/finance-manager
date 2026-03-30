@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { getCurrentUserId } from "@/lib/auth-session"
 
 export async function PATCH(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const userId = await getCurrentUserId()
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
         const { id } = await params
+        const paymentMethodId = parseInt(id)
         const body = await request.json()
         const { name } = body
 
@@ -17,9 +24,20 @@ export async function PATCH(
             )
         }
 
-        const paymentMethod = await prisma.paymentMethod.update({
-            where: { id: parseInt(id) },
+        const updated = await prisma.paymentMethod.updateMany({
+            where: { id: paymentMethodId, userId },
             data: { name },
+        })
+
+        if (updated.count === 0) {
+            return NextResponse.json(
+                { error: "Payment method not found" },
+                { status: 404 }
+            )
+        }
+
+        const paymentMethod = await prisma.paymentMethod.findFirst({
+            where: { id: paymentMethodId, userId },
         })
 
         return NextResponse.json(paymentMethod)
@@ -45,11 +63,24 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const { id } = await params
+        const userId = await getCurrentUserId()
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
 
-        await prisma.paymentMethod.delete({
-            where: { id: parseInt(id) },
+        const { id } = await params
+        const paymentMethodId = parseInt(id)
+
+        const deleted = await prisma.paymentMethod.deleteMany({
+            where: { id: paymentMethodId, userId },
         })
+
+        if (deleted.count === 0) {
+            return NextResponse.json(
+                { error: "Payment method not found" },
+                { status: 404 }
+            )
+        }
 
         return NextResponse.json({ success: true })
     } catch (error: any) {
