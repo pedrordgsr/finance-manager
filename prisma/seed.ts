@@ -21,6 +21,7 @@ async function main() {
     data: {
       name: "Demo User",
       email: "demo@finance.local",
+      username: "demo",
       passwordHash: await bcrypt.hash("123456", 12),
     },
   });

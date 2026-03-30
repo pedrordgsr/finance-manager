@@ -14,7 +14,7 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,13 +26,13 @@ export default function LoginPage() {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        identifier,
         password,
         redirect: false,
       });
 
       if (!result || result.error) {
-        setError("Invalid email or password");
+        setError("Invalid credentials");
         return;
       }
 
@@ -52,10 +52,10 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
             <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              type="text"
+              placeholder="Email or username"
+              value={identifier}
+              onChange={(event) => setIdentifier(event.target.value)}
               required
             />
             <Input

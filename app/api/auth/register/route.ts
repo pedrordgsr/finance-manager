@@ -8,11 +8,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const name = typeof body?.name === "string" ? body.name.trim() : "";
     const email = typeof body?.email === "string" ? body.email.toLowerCase().trim() : "";
+    const username = typeof body?.username === "string" ? body.username.toLowerCase().trim() : "";
     const password = typeof body?.password === "string" ? body.password : "";
 
-    if (!name || !email || !password) {
+    if (!name || !email || !username || !password) {
       return NextResponse.json(
-        { error: "Name, email and password are required" },
+        { error: "Name, username, email and password are required" },
+        { status: 400 },
+      );
+    }
+
+    if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+      return NextResponse.json(
+        { error: "Username must be 3-20 chars and use only letters, numbers or underscore" },
         { status: 400 },
       );
     }
@@ -24,14 +32,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const exists = await prisma.user.findUnique({
-      where: { email },
+    const exists = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { username },
+        ],
+      },
       select: { id: true },
     });
 
     if (exists) {
       return NextResponse.json(
-        { error: "Email already registered" },
+        { error: "Email or username already registered" },
         { status: 409 },
       );
     }
@@ -42,12 +55,14 @@ export async function POST(request: Request) {
       data: {
         name,
         email,
+        username,
         passwordHash,
       },
       select: {
         id: true,
         name: true,
         email: true,
+        username: true,
       },
     });
 

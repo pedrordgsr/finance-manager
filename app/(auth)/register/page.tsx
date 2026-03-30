@@ -13,6 +13,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +30,7 @@ export default function RegisterPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, username, email, password }),
       });
 
       const data = await response.json();
@@ -40,7 +41,7 @@ export default function RegisterPage() {
       }
 
       const loginResult = await signIn("credentials", {
-        email,
+        identifier: username,
         password,
         redirect: false,
       });
@@ -70,6 +71,15 @@ export default function RegisterPage() {
               placeholder="Name"
               value={name}
               onChange={(event) => setName(event.target.value)}
+              required
+            />
+            <Input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(event) => setUsername(event.target.value.toLowerCase())}
+              pattern="[a-z0-9_]{3,20}"
+              title="Use 3-20 chars: letters, numbers and underscore"
               required
             />
             <Input
