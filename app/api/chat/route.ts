@@ -48,7 +48,7 @@ Responda de forma amigável, clara e objetiva em Português.
 Se o usuário perguntar algo fora do contexto financeiro, tente gentilmente trazer o assunto de volta para finanças.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-5.4-nano",
       messages: [
         { role: "system", content: systemPrompt },
         ...messages.map((m: any) => ({
