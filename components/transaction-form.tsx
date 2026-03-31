@@ -18,7 +18,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { Category, Account, PaymentMethod } from "@prisma/client"
+import type { Category, Account, PaymentMethod } from "@/generated/prisma/client"
 
 interface TransactionFormProps {
     categories: Category[]

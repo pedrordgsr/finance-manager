@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useSettings } from "@/components/settings-provider"
 
-import type { Transaction, Category } from "@prisma/client"
+import type { Transaction, Category } from "@/generated/prisma/client"
 
 interface DashboardProps {
   initialData: {

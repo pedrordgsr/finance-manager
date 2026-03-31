@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { AccountForm } from "@/components/account-form";
-import type { Account, AccountType } from "@prisma/client";
+import type { Account, AccountType } from "@/generated/prisma/client";
 import { useTranslations, useLocale } from "next-intl";
 
 interface AccountsTableProps {

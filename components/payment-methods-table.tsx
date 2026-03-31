@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { PaymentMethodForm } from "@/components/payment-method-form";
-import type { PaymentMethod } from "@prisma/client";
+import type { PaymentMethod } from "@/generated/prisma/client";
 import { useTranslations, useLocale } from "next-intl";
 
 interface PaymentMethodsTableProps {

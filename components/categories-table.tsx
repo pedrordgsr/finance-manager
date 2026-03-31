@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { CategoryForm } from "@/components/category-form";
-import type { Category } from "@prisma/client";
+import type { Category } from "@/generated/prisma/client";
 import { useTranslations, useLocale } from "next-intl";
 
 interface CategoriesTableProps {

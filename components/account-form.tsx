@@ -18,7 +18,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import type { AccountType } from "@prisma/client"
+import type { AccountType } from "@/generated/prisma/client"
 
 interface AccountFormProps {
     onSuccess?: () => void

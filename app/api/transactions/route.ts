@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { Direction } from "@prisma/client"
+import type { Direction } from "@/generated/prisma/client"
 import { getCurrentUserId } from "@/lib/auth-session"
 
 export async function GET(request: Request) {

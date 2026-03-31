@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { TransactionForm } from "@/components/transaction-form";
-import type { Transaction, Category, Account, PaymentMethod } from "@prisma/client";
+import type { Transaction, Category, Account, PaymentMethod } from "@/generated/prisma/client";
 
 interface ExtendedTransaction extends Transaction {
     category: Category;
